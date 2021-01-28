@@ -1,16 +1,15 @@
 {
     "id": "501DD25D-1785-43E4-B4E5-A5C78CCC0573",
     "name": "AzureFunctionApp",
-    "friendlyName": "Azure Function",
-    "description": "Update Azure Function on Windows, Function on Linux with built-in images, ASP.NET, .NET Core, PHP, Python or Node.js based Web applications",
-    "helpUrl": "https://aka.ms/azurefunctiondeployreadme",
-    "helpMarkDown": "[More information](https://aka.ms/azurefunctiondeployreadme)",
+    "friendlyName": "Azure Functions",
+    "description": "Update a function app with .NET, Python, JavaScript, PowerShell, Java based web applications",
+    "helpUrl": "https://aka.ms/azurefunctiontroubleshooting",
+    "helpMarkDown": "[Learn more about this task](https://aka.ms/azurefunctiondeployreadme)",
     "category": "Deploy",
     "visibility": [
         "Build",
         "Release"
     ],
-    "preview": "true",
     "runsOn": [
         "Agent",
         "DeploymentGroup"
@@ -18,8 +17,8 @@
     "author": "Microsoft Corporation",
     "version": {
         "Major": 1,
-        "Minor": 0,
-        "Patch": 7
+        "Minor": 182,
+        "Patch": 0
     },
     "minimumAgentVersion": "2.104.1",
     "groups": [
@@ -117,10 +116,20 @@
                 "EditableOptions": "True"
             },
             "options": {
-                "DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0": ".NET",
-                "DOCKER|microsoft/azure-functions-node8:2.0": "JavaScript"
+                "DOTNET|2.2": "DOTNET|2.2 (functionapp v2)",
+                "DOTNET|3.1": "DOTNET|3.1 (functionapp v3)",
+                "JAVA|8": "JAVA|8 (functionapp v2/v3)",
+                "JAVA|11": "JAVA|11  (functionapp v3)",
+                "NODE|8": "NODE|8 (functionapp v2)",
+                "NODE|10": "NODE|10 (functionapp v2/v3)",
+                "NODE|12": "NODE|12 (functionapp v3)",
+                "NODE|14": "NODE|14 (functionapp v3)",
+                "PYTHON|3.6": "PYTHON|3.6 (functionapp v2/v3)",
+                "PYTHON|3.7": "PYTHON|3.7 (functionapp v2/v3)",
+                "PYTHON|3.8": "PYTHON|3.8 (functionapp v3)"
             },
-            "visibleRule": "appType = functionAppLinux"
+            "visibleRule": "appType = functionAppLinux",
+            "helpMarkDown": "Refer [this doc](https://docs.microsoft.com/azure/azure-functions/functions-versions#languages) for supported runtime versions.  Old values like `DOCKER|microsoft/azure-functions-*` are deprecated, please use the new values from dropdown."
         },
         {
             "name": "startUpCommand",
@@ -128,7 +137,8 @@
             "label": "Startup command ",
             "defaultValue": "",
             "required": false,
-            "visibleRule": "appType = functionAppLinux"
+            "visibleRule": "appType = functionAppLinux",
+            "helpMarkDown": "Enter the start up command. For ex.<br/>dotnet exec filename.dll<br/>dotnet filename.dll"
         },
         {
             "name": "customWebConfig",
@@ -247,7 +257,7 @@
         "MSDeploygeneratedpackageareonlysupportedforWindowsplatform": "MSDeploy generated packages are only supported for Windows platform.",
         "UnsupportedinstalledversionfoundforMSDeployversionshouldbeatleast3orabove": "Unsupported installed version: %s found for MSDeploy. version should be at least 3 or above",
         "UnabletofindthelocationofMSDeployfromregistryonmachineError": "Unable to find the location of MS Deploy from registry on machine (Error : %s)",
-        "Nopackagefoundwithspecifiedpattern": "No package found with specified pattern: %s",
+        "Nopackagefoundwithspecifiedpattern": "No package found with specified pattern: %s<br/>Check if the package mentioned in the task is published as an artifact in the build or a previous stage and downloaded in the current job.",
         "MorethanonepackagematchedwithspecifiedpatternPleaserestrainthesearchpattern": "More than one package matched with specified pattern: %s. Please restrain the search pattern.",
         "Trytodeploywebappagainwithappofflineoptionselected": "Try to deploy app service again with Take application offline option selected.",
         "Trytodeploywebappagainwithrenamefileoptionselected": "Try to deploy app service again with Rename locked files option selected.",
@@ -344,9 +354,8 @@
         "FailedToGetAppServicePublishingCredentials": "Failed to fetch App Service '%s' publishing credentials. Error: %s",
         "FailedToGetAppServiceApplicationSettings": "Failed to get App service '%s' application settings. Error: %s",
         "FailedToUpdateAppServiceApplicationSettings": "Failed to update App service '%s' application settings. Error: %s",
-        "UpdatingAppServiceConfigurationSettings": "Updating App Service Configuration settings. Data: %s",
+        "UpdatingAppServiceConfigurationSettings": "Trying to update App Service Configuration settings. Data: %s",
         "UpdatedAppServiceConfigurationSettings": "Updated App Service Configuration settings.",
-        "UpdatingAppServiceApplicationSettings": "Updating App Service Application settings. Data: %s",
         "UpdatedAppServiceApplicationSettings": "Updated App Service Application settings and Kudu Application settings.",
         "UpdatedOnlyAppServiceApplicationSettings": "Updated App Service Application settings.",
         "MultipleResourceGroupFoundForAppService": "Multiple resource group found for App Service '%s'.",

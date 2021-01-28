@@ -1,11 +1,10 @@
 "use strict";
 
-import tl = require('vsts-task-lib/task');
+import tl = require('azure-pipelines-task-lib/task');
 import path = require('path');
 import fs = require('fs');
-import * as toolLib from 'vsts-task-tool-lib/tool';
 
-import kubectlutility = require("utility-common/kubectlutility");
+import kubectlutility = require("azure-pipelines-tasks-kubernetes-common-v2/kubectlutility");
 import * as utils from './utils';
 
 

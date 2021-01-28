@@ -3,7 +3,7 @@
   "name": "AzureRmWebAppDeployment",
   "friendlyName": "ms-resource:loc.friendlyName",
   "description": "ms-resource:loc.description",
-  "helpUrl": "https://aka.ms/azurermwebdeployreadme",
+  "helpUrl": "https://aka.ms/azureappservicetroubleshooting",
   "helpMarkDown": "ms-resource:loc.helpMarkDown",
   "category": "Deploy",
   "visibility": [
@@ -17,8 +17,8 @@
   "author": "Microsoft Corporation",
   "version": {
     "Major": 4,
-    "Minor": 3,
-    "Patch": 21
+    "Minor": 181,
+    "Patch": 0
   },
   "releaseNotes": "ms-resource:loc.releaseNotes",
   "minimumAgentVersion": "2.104.1",
@@ -79,7 +79,7 @@
       "label": "ms-resource:loc.input.label.PublishProfilePath",
       "defaultValue": "$(System.DefaultWorkingDirectory)/**/*.pubxml",
       "required": true,
-      "helpMarkDown": "",
+      "helpMarkDown": "ms-resource:loc.input.help.PublishProfilePath",
       "visibleRule": "ConnectionType = PublishProfile"
     },
     {
@@ -108,6 +108,9 @@
         "functionAppContainer": "Function App for Containers (Linux)",
         "apiApp": "API App",
         "mobileApp": "Mobile App"
+      },
+      "properties": {
+        "EditableOptions": "true"
       },
       "helpMarkDown": "ms-resource:loc.input.help.WebAppKind",
       "visibleRule": "ConnectionType = AzureRM"
@@ -230,8 +233,17 @@
         "EditableOptions": "True"
       },
       "options": {
-        "DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0": ".NET",
-        "DOCKER|microsoft/azure-functions-node8:2.0": "JavaScript"
+        "DOTNET|2.2": "DOTNET|2.2 (functionapp v2)",
+        "DOTNET|3.1": "DOTNET|3.1 (functionapp v3)",
+        "JAVA|8": "JAVA|8 (functionapp v2/v3)",
+        "JAVA|11": "JAVA|11  (functionapp v3)",
+        "NODE|8": "NODE|8 (functionapp v2)",
+        "NODE|10": "NODE|10 (functionapp v2/v3)",
+        "NODE|12": "NODE|12 (functionapp v3)",
+        "NODE|14": "NODE|14 (functionapp v3)",
+        "PYTHON|3.6": "PYTHON|3.6 (functionapp v2/v3)",
+        "PYTHON|3.7": "PYTHON|3.7 (functionapp v2/v3)",
+        "PYTHON|3.8": "PYTHON|3.8 (functionapp v3)"
       },
       "helpMarkDown": "ms-resource:loc.input.help.RuntimeStackFunction",
       "visibleRule": "WebAppKind = functionAppLinux"
@@ -242,7 +254,7 @@
       "label": "ms-resource:loc.input.label.StartupCommand",
       "defaultValue": "",
       "required": false,
-      "visibleRule": "WebAppKind = webAppLinux || WebAppKind = webAppContainer || WebAppkind = functionAppContainer",
+      "visibleRule": "WebAppKind = webAppLinux || WebAppKind = webAppContainer || WebAppkind = functionAppContainer || WebAppKind = functionAppLinux",
       "helpMarkDown": "ms-resource:loc.input.help.StartupCommand"
     },
     {
@@ -477,7 +489,7 @@
       "parameters": {
         "osTypeSelected": "Linux"
       },
-      "resultTemplate": "{\"Value\":\"{{{ runtimeVersion }}}\",\"DisplayValue\":\"{{{ displayVersion }}}\"}"
+      "resultTemplate": "{\"Value\":\"{{{ runtimeVersion }}}\",\"DisplayValue\":\"{{{ displayVersion }}} ({{{ runtimeVersion }}})\"}"
     }
   ],
   "instanceNameFormat": "ms-resource:loc.instanceNameFormat",
@@ -611,6 +623,8 @@
     "UpdatingAppServiceConfigurationSettings": "ms-resource:loc.messages.UpdatingAppServiceConfigurationSettings",
     "UpdatedAppServiceConfigurationSettings": "ms-resource:loc.messages.UpdatedAppServiceConfigurationSettings",
     "UpdatingAppServiceApplicationSettings": "ms-resource:loc.messages.UpdatingAppServiceApplicationSettings",
+    "AppServiceApplicationSettingsAlreadyPresent": "ms-resource:loc.messages.AppServiceApplicationSettingsAlreadyPresent",
+    "AppServiceConnectionStringsAlreadyPresent": "ms-resource:loc.messages.AppServiceConnectionStringsAlreadyPresent",
     "UpdatedAppServiceApplicationSettings": "ms-resource:loc.messages.UpdatedAppServiceApplicationSettings",
     "MultipleResourceGroupFoundForAppService": "ms-resource:loc.messages.MultipleResourceGroupFoundForAppService",
     "PackageDeploymentUsingZipDeployFailed": "ms-resource:loc.messages.PackageDeploymentUsingZipDeployFailed",

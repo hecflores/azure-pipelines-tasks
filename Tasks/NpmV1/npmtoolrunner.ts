@@ -3,13 +3,13 @@ import * as path from 'path';
 import { format, parse, Url } from 'url';
 import * as Q from 'q';
 
-import * as tl from 'vsts-task-lib/task';
-import * as tr from 'vsts-task-lib/toolrunner';
+import * as tl from 'azure-pipelines-task-lib/task';
+import * as tr from 'azure-pipelines-task-lib/toolrunner';
 import {NpmTaskInput} from './constants';
 
-import * as util from 'packaging-common/util';
-import * as npmutil from 'packaging-common/npm/npmutil';
-import * as telemetry from 'utility-common/telemetry';
+import * as util from 'azure-pipelines-tasks-packaging-common/util';
+import * as npmutil from 'azure-pipelines-tasks-packaging-common/npm/npmutil';
+import * as telemetry from 'azure-pipelines-tasks-utility-common/telemetry';
 
 export class NpmToolRunner extends tr.ToolRunner {
     private cacheLocation: string;
@@ -68,17 +68,29 @@ export class NpmToolRunner extends tr.ToolRunner {
         return execResult;
     }
 
-    private static _getProxyFromEnvironment(): string {
+    public static _getProxyFromEnvironment(): string {
         let proxyUrl: string = tl.getVariable('agent.proxyurl');
         if (proxyUrl) {
             let proxy: Url = parse(proxyUrl);
             let proxyUsername: string = tl.getVariable('agent.proxyusername') || '';
             let proxyPassword: string = tl.getVariable('agent.proxypassword') || '';
 
-            let auth = `${proxyUsername}:${proxyPassword}`;
-            proxy.auth = auth;
+            if (proxyUsername !== '') {
+                proxy.auth = proxyUsername;
+            }
 
-            return format(proxy);
+            if (proxyPassword !== '') {
+                proxy.auth = `${proxyUsername}:${proxyPassword}`;
+            }
+
+            const authProxy = format(proxy);
+
+            // register the formatted proxy url as a secret if it contains a password
+            if (proxyPassword !== '') {
+                tl.setSecret(authProxy);
+            }
+
+            return authProxy;
         }
 
         return undefined;
@@ -100,9 +112,17 @@ export class NpmToolRunner extends tr.ToolRunner {
             options.env['NPM_CONFIG_USERCONFIG'] = this.npmrc;
         }
 
+        function sanitizeUrl(url: string): string {
+            const parsed = parse(url);
+            if(parsed.auth) {
+                parsed.auth = "***:***";
+            }
+            return format(parsed);
+        }
+
         let proxy = NpmToolRunner._getProxyFromEnvironment();
         if (proxy) {
-            tl.debug(`Using proxy "${proxy}" for npm`);
+            tl.debug(`Using proxy "${sanitizeUrl(proxy)}" for npm`);
             options.env['NPM_CONFIG_PROXY'] = proxy;
             options.env['NPM_CONFIG_HTTPS-PROXY'] = proxy;
 

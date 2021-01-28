@@ -1,5 +1,5 @@
-import ma = require('vsts-task-lib/mock-answer');
-import tmrm = require('vsts-task-lib/mock-run');
+import ma = require('azure-pipelines-task-lib/mock-answer');
+import tmrm = require('azure-pipelines-task-lib/mock-run');
 import path = require('path');
 
 const DefaultWorkingDirectory: string = "C:\\a\\w\\";
@@ -16,7 +16,9 @@ tr.setInput('qualifyImageNames', process.env["__qualifyImageNames__"] || "false"
 tr.setInput('additionalDockerComposeFiles', process.env["__additionalDockerComposeFiles__"] || null);
 tr.setInput('dockerComposeCommand', process.env["__dockerComposeCommand__"] || null);
 tr.setInput('azureSubscriptionEndpoint', 'AzureRMSpn');
-tr.setInput('azureContainerRegistry', '{"loginServer":"ajgtestacr1.azurecr.io", "id" : "/subscriptions/c00d16c7-6c1f-4c03-9be1-6934a4c49682/resourcegroups/ajgtestacr1rg/providers/Microsoft.ContainerRegistry/registries/ajgtestacr1"}')
+tr.setInput('azureContainerRegistry', '{"loginServer":"ajgtestacr1.azurecr.io", "id" : "/subscriptions/c00d16c7-6c1f-4c03-9be1-6934a4c49682/resourcegroups/ajgtestacr1rg/providers/Microsoft.ContainerRegistry/registries/ajgtestacr1"}');
+tr.setInput('arguments', process.env["__arguments__"] || '');
+tr.setInput('dockerComposePath', process.env["__dockerComposePath__"] || '');
 
 console.log("Inputs have been set");
 
@@ -38,7 +40,7 @@ process.env['AGENT_HOMEDIRECTORY'] = 'F:\\dir2\\';
 let a: any = <any>{
     "which": {
         "docker": "docker",
-        "docker-compose": "docker-compose"
+        "docker-compose" : "docker-compose"
     },
     "checkPath": {
         "docker": true,
@@ -80,6 +82,22 @@ let a: any = <any>{
         "docker-compose -f F:\\dir2\\docker-compose.yml up -d":{
             "code": 0,
             "stdout": "successfully ran up command"
+        },
+        "docker-compose -f F:\\dir2\\docker-compose.yml build --pull --parallel" :{
+            "code": 0,
+            "stdout": "sucessfully built the service images"
+        },
+        "docker-compose-userdefined -f F:\\dir2\\docker-compose.yml config" :{
+            "code": 0,
+            "stdout": "services:\n  redis:\n    image: redis:alpine\n  web:\n    build:\n      context: C:\\docketest\n    ports:\n    - 5000:5000/tcp\n    volumes:\n    - C:\\docketest:/code:rw\nversion: '2.0'"
+        },
+        "docker-compose-userdefined -f F:\\dir2\\docker-compose.yml build" :{
+            "code": 0,
+            "stdout": "sucessfully built the service images"
+        },
+        "docker-compose -f F:\\dir2\\docker-compose.yml pull service1 service2" :{
+            "code": 0,
+            "stdout": "successfully pulled the passed service images"
         }
     },
     "exist": {
@@ -100,6 +118,11 @@ tr.registerMock('./utils', {
     },
     writeFileSync: function(filename: string, data: any, options?: { encoding?: string; mode?: number; flag?: string; }){
         console.log("content of yaml file : "+data);
+    },
+    writeTaskOutput: function (commandName: string, output: string): string {
+        let outputFileName = commandName + "_" + Date.now() + ".txt";
+        console.log(`Mocked test writing to: ${outputFileName}`);
+        return outputFileName;
     }
 });
 

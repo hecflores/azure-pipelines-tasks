@@ -1,6 +1,6 @@
 {
   "loc.friendlyName": "Docker Compose",
-  "loc.helpMarkDown": "[Plus d'informations](https://go.microsoft.com/fwlink/?linkid=848006)",
+  "loc.helpMarkDown": "[Learn more about this task](https://go.microsoft.com/fwlink/?linkid=848006) or [see the Docker Compose documentation](https://docs.docker.com/)",
   "loc.description": "Effectuez la build, le Push ou l'exécution d'applications Docker à plusieurs conteneurs. La tâche peut être utilisée avec le registre de conteneurs Docker ou Azure.",
   "loc.instanceNameFormat": "$(action)",
   "loc.group.displayName.advanced": "Options avancées",
@@ -58,6 +58,8 @@
   "loc.input.help.outputDockerComposeFile": "Chemin d'un fichier Docker Compose de sortie.",
   "loc.input.label.dockerComposeCommand": "Commande",
   "loc.input.help.dockerComposeCommand": "Commande Docker Compose à exécuter avec les arguments. Par exemple, 'rm --all' permet de supprimer tous les conteneurs de service arrêtés.",
+  "loc.input.label.arguments": "Arguments",
+  "loc.input.help.arguments": "Docker Compose command options. Ex:<br> For build command,<br>--pull --compress --parallel",
   "loc.input.label.dockerHostEndpoint": "Connexion de service d'hôte Docker",
   "loc.input.help.dockerHostEndpoint": "Sélectionnez une connexion de service d'hôte Docker. Par défaut, il s'agit de l'hôte de l'agent.",
   "loc.input.label.nopIfNoDockerComposeFile": "Ne rien faire s'il ne s'agit pas d'un fichier Docker Compose",
@@ -66,12 +68,15 @@
   "loc.input.help.requireAdditionalDockerComposeFiles": "Produit une erreur si les fichiers Docker Compose supplémentaires n'existent pas. Ceci remplace le comportement par défaut qui consiste à ignorer un fichier inexistant.",
   "loc.input.label.cwd": "Répertoire de travail",
   "loc.input.help.cwd": "Répertoire de travail de la commande Docker Compose.",
+  "loc.messages.ConnectingToDockerHost": "DOCKER_HOST variable is set. Docker will try to connect to the Docker host: %s",
   "loc.messages.ContainerPatternFound": "Modèle trouvé dans le paramètre filepath Docker Compose",
   "loc.messages.ContainerPatternNotFound": "Modèle introuvable dans le paramètre filepath Docker Compose",
   "loc.messages.ContainerDockerFileNotFound": "Le fichier Docker correspondant à %s est introuvable.",
   "loc.messages.AdditionalDockerComposeFileDoesNotExists": "Le fichier Docker Compose supplémentaire %s n'existe pas.",
   "loc.messages.CantWriteDataToFile": "Impossible d'écrire des données dans le fichier %s. Erreur : %s",
+  "loc.messages.DockerHostVariableWarning": "DOCKER_HOST variable is set. Please ensure that the Docker daemon is running on: %s",
   "loc.messages.NoDataWrittenOnFile": "Aucune donnée n'a été écrite dans le fichier %s",
   "loc.messages.FileContentSynced": "Synchronisation effectuée du contenu du fichier sur le disque. Le contenu est %s.",
-  "loc.messages.ImageNameWithoutTag": "Nom d'image non spécifié avec l'étiquette. Envoi (push) de toutes les étiquettes de l'image spécifiée."
+  "loc.messages.ImageNameWithoutTag": "Nom d'image non spécifié avec l'étiquette. Envoi (push) de toutes les étiquettes de l'image spécifiée.",
+  "loc.messages.WritingDockerConfigToTempFile": "Écriture de la configuration Docker dans le fichier temporaire. Chemin de fichier : %s. Configuration Docker : %s"
 }

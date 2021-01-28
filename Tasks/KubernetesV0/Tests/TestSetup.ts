@@ -1,5 +1,5 @@
-import ma = require('vsts-task-lib/mock-answer');
-import tmrm = require('vsts-task-lib/mock-run');
+import ma = require('azure-pipelines-task-lib/mock-answer');
+import tmrm = require('azure-pipelines-task-lib/mock-run');
 import path = require('path');
 import * as shared from './TestShared';
 var Stats = require('fs').Stats
@@ -62,7 +62,7 @@ process.env["ENDPOINT_DATA_AzureRMSpn_SUBSCRIPTIONID"] =  "sId";
 process.env["ENDPOINT_DATA_AzureRMSpn_SPNOBJECTID"] =  "oId";
 
 // provide answers for task mock
-let a = {
+let a: ma.TaskLibAnswers = <ma.TaskLibAnswers> {
     "which" : {
     },
      "checkPath": {
@@ -154,8 +154,10 @@ a.exec[`kubectl --kubeconfig ${KubconfigFile} logs nginx`] = {
     "code": 0
 };
 
+process.env["MOCK_NORMALIZE_SLASHES"] = "true";
 tr.setAnswers(<any>a);
 
+tr.registerMock('azure-pipelines-task-lib/toolrunner', require('azure-pipelines-task-lib/mock-toolrunner'));
 // Create mock for fs module
 let fs = require('fs');
 let fsClone = Object.assign({}, fs);
@@ -185,14 +187,17 @@ fsClone.writeFileSync = function(fileName, data) {
     }
 };
 
-fsClone.chmodSync = function(path, mode) {
-      switch(path){
-          case KubectlPath:
+fsClone.chmodSync = function (path, mode) {
+    if (process.env["chmodShouldThrowError"] === "true") {
+        throw new Error("No enough permissions");
+    }
+    switch (path) {
+        case KubectlPath:
             console.log(`Set kubectlPath to ${KubectlPath} and added permissions`);
             break;
-          default:
-            fs.chmodSync(path, mode);        
-      }
+        default:
+            fs.chmodSync(path, mode);
+    }
 };
 
 fsClone.statSync = (s: string) => {
@@ -218,7 +223,6 @@ fsClone.statSync = (s: string) => {
 
     return stat;
 }
-
 
 tr.registerMock('fs', fsClone);
 

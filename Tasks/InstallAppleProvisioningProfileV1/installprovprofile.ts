@@ -1,10 +1,8 @@
 import path = require('path');
-import sign = require('ios-signing-common/ios-signing-common');
-import secureFilesCommon = require('securefiles-common/securefiles-common');
-import tl = require('vsts-task-lib/task');
+import sign = require('azure-pipelines-tasks-ios-signing-common/ios-signing-common');
+import secureFilesCommon = require('azure-pipelines-tasks-securefiles-common/securefiles-common');
+import tl = require('azure-pipelines-task-lib/task');
 import os = require('os');
-
-import { ToolRunner } from 'vsts-task-lib/toolrunner';
 
 async function run() {
     let secureFileId: string;

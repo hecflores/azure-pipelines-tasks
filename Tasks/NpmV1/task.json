@@ -2,14 +2,14 @@
     "id": "FE47E961-9FA8-4106-8639-368C022D43AD",
     "name": "Npm",
     "friendlyName": "npm",
-    "description": "Install and publish npm packages, or run an npm command. Supports npmjs.com and authenticated registries like Package Management.",
-    "helpUrl": "https://go.microsoft.com/fwlink/?LinkID=613746",
-    "helpMarkDown": "[More Information](https://go.microsoft.com/fwlink/?LinkID=613746)",
+    "description": "Install and publish npm packages, or run an npm command. Supports npmjs.com and authenticated registries like Azure Artifacts.",
+    "helpUrl": "https://docs.microsoft.com/azure/devops/pipelines/tasks/package/npm",
+    "helpMarkDown": "[Learn more about this task](https://go.microsoft.com/fwlink/?LinkID=613746) or [see the npm documentation](https://docs.npmjs.com/)",
     "category": "Package",
     "author": "Microsoft Corporation",
     "version": {
         "Major": 1,
-        "Minor": 149,
+        "Minor": 182,
         "Patch": 0
     },
     "runsOn": [
@@ -26,7 +26,7 @@
             "displayName": "Custom registries and authentication",
             "name": "customRegistries",
             "isExpanded": false,
-            "visibleRule": "command = install || command = custom"
+            "visibleRule": "command = install || command = ci || command = custom"
         },
         {
             "name": "publishRegistries",
@@ -38,17 +38,18 @@
             "displayName": "Advanced",
             "name": "advanced",
             "isExpanded": false,
-            "visibleRule": "command = install || command = publish"
+            "visibleRule": "command = install || command = ci || command = publish"
         }
     ],
     "inputs": [
         {
             "name": "command",
             "label": "Command",
-            "helpMarkDown": "The command and arguments which will be passed to npm for execution.\n\nIf your arguments contain double quotes (\"), escape them with a slash (\\), and surround the escaped string with double quotes (\").",
+            "helpMarkDown": "The command and arguments which will be passed to npm for execution.\n\nIf your arguments contain double quotes (\"), escape them with a slash (\\\\), and surround the escaped string with double quotes (\").",
             "type": "pickList",
             "required": true,
             "options": {
+                "ci": "ci",
                 "install": "install",
                 "publish": "publish",
                 "custom": "custom"
@@ -95,7 +96,10 @@
             "helpMarkDown": "Include the selected feed in the generated .npmrc.",
             "type": "pickList",
             "visibleRule": "customRegistry = useFeed",
-            "required": true
+            "required": true,
+            "properties": {
+                "EditableOptions": "True"
+            }
         },
         {
             "groupName": "customRegistries",
@@ -124,10 +128,13 @@
             "groupName": "publishRegistries",
             "name": "publishFeed",
             "label": "Target registry",
-            "helpMarkDown": "Select a registry hosted in this account. You must have Package Management installed and licensed to select a registry here.",
+            "helpMarkDown": "Select a registry hosted in this account. You must have Azure Artifacts installed and licensed to select a registry here.",
             "type": "pickList",
             "visibleRule": "publishRegistry = useFeed",
-            "required": true
+            "required": true,
+            "properties": {
+                "EditableOptions": "True"
+            }
         },
         {
             "name": "publishPackageMetadata",
@@ -152,20 +159,20 @@
         {
             "target": "customFeed",
             "endpointId": "tfs:feed",
-            "endpointUrl": "{{endpoint.url}}/_apis/packaging/feeds",
+            "endpointUrl": "{{endpoint.url}}/_apis/packaging/feeds?includeUrls=False",
             "resultSelector": "jsonpath:$.value[*]",
-            "resultTemplate": "{ \"Value\": \"{{{id}}}\", \"DisplayValue\": \"{{{name}}}\"}"
+            "resultTemplate": "{ \"Value\" : \"{{#if project}}{{{project.id}}}\\/{{/if}}{{{id}}}\", \"DisplayValue\" : \"{{{name}}}\" }"
         },
         {
             "target": "publishFeed",
             "endpointId": "tfs:feed",
-            "endpointUrl": "{{endpoint.url}}/_apis/packaging/feeds",
+            "endpointUrl": "{{endpoint.url}}/_apis/packaging/feeds?includeUrls=False",
             "resultSelector": "jsonpath:$.value[*]",
-            "resultTemplate": "{ \"Value\": \"{{{id}}}\", \"DisplayValue\": \"{{{name}}}\"}"
+            "resultTemplate": "{ \"Value\" : \"{{#if project}}{{{project.id}}}\\/{{/if}}{{{id}}}\", \"DisplayValue\" : \"{{{name}}}\" }"
         }
     ],
     "execution": {
-        "Node": {
+        "Node10": {
             "target": "npm.js"
         }
     },

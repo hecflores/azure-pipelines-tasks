@@ -1,4 +1,4 @@
-import tl = require('vsts-task-lib/task');
+import tl = require('azure-pipelines-task-lib/task');
 import fs = require('fs');
 import util = require('util');
 import webClient = require('./webClient');
@@ -448,14 +448,24 @@ export class Kudu {
         }
     }
 
+    public getKuduStackTrace() {
+        let stackTraceUrl = this._client.getRequestUri(`/api/vfs/LogFiles/kudu/trace`);
+        return stackTraceUrl;
+    }
+
     public async zipDeploy(webPackage: string, queryParameters?: Array<string>): Promise<any> {
         let httpRequest = new webClient.WebRequest();
         httpRequest.method = 'POST';
         httpRequest.uri = this._client.getRequestUri(`/api/zipdeploy`, queryParameters);
         httpRequest.body = fs.createReadStream(webPackage);
+        let requestOptions = new webClient.WebRequestOptions();
+        //Bydefault webclient.sendRequest retries for  [408, 409, 500, 502, 503, 504] as suggested by appservice team for zipdeploy api 
+        //408 and 409 should not be retried as it will never turn into success
+        requestOptions.retriableStatusCodes = [500, 502, 503, 504];
+        requestOptions.retryIntervalInSeconds = 5;
 
         try {
-            let response = await this._client.beginRequest(httpRequest, null, 'application/octet-stream');
+            let response = await this._client.beginRequest(httpRequest, requestOptions, 'application/octet-stream');
             tl.debug(`ZIP Deploy response: ${JSON.stringify(response)}`);
             if(response.statusCode == 200) {
                 tl.debug('Deployment passed');
@@ -488,7 +498,7 @@ export class Kudu {
         httpRequest.body = fs.createReadStream(webPackage);
 
         try {
-            let response = await this._client.beginRequest(httpRequest);
+            let response = await this._client.beginRequest(httpRequest, null, 'application/octet-stream');
             tl.debug(`War Deploy response: ${JSON.stringify(response)}`);
             if(response.statusCode == 200) {
                 tl.debug('Deployment passed');
@@ -628,15 +638,15 @@ export class Kudu {
     }
 
     private _getFormattedError(error: any) {
-        if(error && error.statusCode) {
-            return `${error.statusMessage} (CODE: ${error.statusCode})`;
-        }
-        else if(error && error.message) {
+       if(error && error.message) {
             if(error.statusCode) {
                 error.message = `${typeof error.message.valueOf() == 'string' ? error.message : error.message.Code + " - " + error.message.Message } (CODE: ${error.statusCode})`
             }
 
             return error.message;
+        }
+        else  if(error && error.statusCode) {
+            return `${error.statusMessage} (CODE: ${error.statusCode})`;
         }
 
         return error;

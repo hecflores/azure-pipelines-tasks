@@ -2,9 +2,9 @@
     "id": "AC4EE482-65DA-4485-A532-7B085873E532",
     "name": "Maven",
     "friendlyName": "Maven",
-    "description": "Build with Apache Maven",
-    "helpUrl": "https://go.microsoft.com/fwlink/?LinkID=613723",
-    "helpMarkDown": "[More Information](https://go.microsoft.com/fwlink/?LinkID=613723)",
+    "description": "Build, test, and deploy with Apache Maven",
+    "helpUrl": "https://docs.microsoft.com/azure/devops/pipelines/tasks/build/maven",
+    "helpMarkDown": "[Learn more about this task](https://go.microsoft.com/fwlink/?LinkID=613723) or [see the Maven documentation](http://maven.apache.org/guides/index.html)",
     "category": "Build",
     "visibility": [
         "Build",
@@ -17,8 +17,8 @@
     "author": "Microsoft Corporation",
     "version": {
         "Major": 3,
-        "Minor": 149,
-        "Patch": 2
+        "Minor": 181,
+        "Patch": 1
     },
     "releaseNotes": "Configuration of the SonarQube analysis was moved to the [SonarQube](https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarqube) or [SonarCloud](https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarcloud) extensions, in task `Prepare Analysis Configuration`",
     "demands": [
@@ -77,11 +77,11 @@
         {
             "name": "publishJUnitResults",
             "type": "boolean",
-            "label": "Publish to Azure Pipelines/TFS",
+            "label": "Publish to Azure Pipelines",
             "required": true,
             "defaultValue": "true",
             "groupName": "junitTestResults",
-            "helpMarkDown": "Select this option to publish JUnit test results produced by the Maven build to Azure Pipelines/TFS. Each test results file matching `Test Results Files` will be published as a test run in Azure Pipelines/TFS."
+            "helpMarkDown": "Select this option to publish JUnit test results produced by the Maven build to Azure Pipelines. Each test results file matching `Test Results Files` will be published as a test run in Azure Pipelines."
         },
         {
             "name": "testResultsFiles",
@@ -169,6 +169,19 @@
             "required": false,
             "groupName": "codeCoverage",
             "helpMarkDown": "Fail the build if code coverage did not produce any results to publish.",
+            "visibleRule": "codeCoverageTool != None"
+        },
+        {
+            "name": "restoreOriginalPomXml",
+            "aliases": [
+                "codeCoverageRestoreOriginalPomXml"
+            ],
+            "type": "boolean",
+            "label": "Restore original pom.xml after task execution",
+            "defaultValue": "false",
+            "required": false,
+            "groupName": "codeCoverage",
+            "helpMarkDown": "Code coverage modifies pom.xml to produce results. Use this option if you need to keep original pom.xml.",
             "visibleRule": "codeCoverageTool != None"
         },
         {
@@ -300,7 +313,19 @@
             "required": true,
             "defaultValue": "false",
             "groupName": "advanced",
-            "helpMarkDown": "Automatically authenticate built-in Maven feeds from the Azure Artifacts/TFS [Package Management](https://marketplace.visualstudio.com/items?itemName=ms.feed) extension. If built-in Maven feeds are not in use, deselect this option for faster builds."
+            "helpMarkDown": "Automatically authenticate Maven feeds from Azure Artifacts. If built-in Maven feeds are not in use, deselect this option for faster builds."
+        },
+        {
+            "name": "skipEffectivePom",
+            "aliases": [
+                "effectivePomSkip"
+            ],
+            "type": "boolean",
+            "label": "Skip generating effective POM while authenticating built-in feeds",
+            "required": true,
+            "defaultValue": "false",
+            "groupName": "advanced",
+            "helpMarkDown": "Authenticate built-in Maven feeds using the POM only, allowing parent POMs in Azure Artifacts/Azure DevOps Server [Package Management] feeds."
         },
         {
             "name": "sqAnalysisEnabled",
@@ -313,6 +338,16 @@
             "defaultValue": "false",
             "groupName": "CodeAnalysis",
             "helpMarkDown": "This option has changed from version 1 of the **Maven** task to use the [SonarQube](https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarqube) and [SonarCloud](https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarcloud) marketplace extensions.  Enable this option to run [SonarQube or SonarCloud analysis](http://redirect.sonarsource.com/doc/install-configure-scanner-tfs-ts.html) after executing goals in the **Goals** field. The **install** or **package** goal should run first. You must also add a **Prepare Analysis Configuration** task from one of the extensions to the build pipeline before this Maven task."
+        },
+        {
+            "name": "isJacocoCoverageReportXML",
+            "type": "boolean",
+            "label": "Use XML Jacoco reports for SonarQube analysis",
+            "defaultValue": "false",
+            "required": false,
+            "groupName": "CodeAnalysis",
+            "helpMarkDown": "Use XML Jacoco reports for SonarQube analysis. [More info](https://docs.sonarqube.org/latest/analysis/coverage/)",
+            "visibleRule": "and(sqAnalysisEnabled = true, codeCoverageTool = JaCoCo) "
         },
         {
             "name": "sqMavenPluginVersionChoice",
@@ -366,7 +401,7 @@
         }
     ],
     "execution": {
-        "Node": {
+        "Node10": {
             "target": "maventask.js",
             "argumentFormat": ""
         }

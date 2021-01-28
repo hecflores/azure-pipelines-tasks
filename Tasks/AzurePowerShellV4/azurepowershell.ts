@@ -1,9 +1,10 @@
 import fs = require('fs');
 import path = require('path');
 import os = require('os');
-import tl = require('vsts-task-lib/task');
-import tr = require('vsts-task-lib/toolrunner');
-import { AzureRMEndpoint } from 'azure-arm-rest/azure-arm-endpoint';
+import tl = require('azure-pipelines-task-lib/task');
+import tr = require('azure-pipelines-task-lib/toolrunner');
+import * as telemetry from 'utility-common-v2/telemetry';
+import { AzureRMEndpoint } from 'azure-pipelines-tasks-azure-arm-rest-v2/azure-arm-endpoint';
 var uuidV4 = require('uuid/v4');
 
 async function run() {
@@ -11,6 +12,7 @@ async function run() {
         tl.setResourcePath(path.join(__dirname, 'task.json'));
 
         // Get inputs.
+        console.log("## Validating Inputs");
         let _vsts_input_errorActionPreference: string = tl.getInput('errorActionPreference', false) || 'Stop';
         switch (_vsts_input_errorActionPreference.toUpperCase()) {
             case 'STOP':
@@ -30,6 +32,7 @@ async function run() {
         let customTargetAzurePs: string = tl.getInput('CustomTargetAzurePs', false);
         let serviceName = tl.getInput('ConnectedServiceNameARM',/*required*/true);
         let endpointObject= await new AzureRMEndpoint(serviceName).getEndpoint();
+        let input_workingDirectory = tl.getPathInput('workingDirectory', /*required*/ true, /*check*/ true);
 
         // string constants
         let otherVersion = "OtherVersion"
@@ -53,8 +56,10 @@ async function run() {
                 throw new Error(tl.loc('JS_InvalidFilePath', scriptPath));
             }
         }
+        console.log("## Validating Inputs Complete");
 
         // Generate the script contents.
+        console.log("## Initializing Az module");
         console.log(tl.loc('GeneratingScript'));
         let contents: string[] = [];
         let azFilePath = path.join(path.resolve(__dirname), 'InitializeAz.ps1');
@@ -66,8 +71,13 @@ async function run() {
             contents.push(`${azFilePath} -endpoint '${endpoint}' -targetAzurePs  ${targetAzurePs}`);
         }
 
+        if(scriptArguments == null)
+        {
+            scriptArguments = "";
+        }
+
         if (scriptType.toUpperCase() == 'FILEPATH') {
-            contents.push(`. '${scriptPath.replace("'", "''")}' ${scriptArguments}`.trim());
+            contents.push(`. '${scriptPath.replace(/'/g, "''")}' ${scriptArguments}`.trim());
             console.log(tl.loc('JS_FormattedCommand', contents[contents.length - 1]));
         }
         else {
@@ -85,7 +95,9 @@ async function run() {
             '\ufeff' + contents.join(os.EOL), // Prepend the Unicode BOM character.
             { encoding: 'utf8' });           // Since UTF8 encoding is specified, node will
                                             // encode the BOM into its UTF8 binary sequence.
+        console.log("## Az module initialization Complete");
 
+        console.log("## Beginning Script Execution");
         // Run the script.
         //
         // Note, prefer "pwsh" over "powershell". At some point we can remove support for "powershell".
@@ -99,9 +111,10 @@ async function run() {
             .arg('-ExecutionPolicy')
             .arg('Unrestricted')
             .arg('-Command')
-            .arg(`. '${filePath.replace("'", "''")}'`);
+            .arg(`. '${filePath.replace(/'/g, "''")}'`);
 
         let options = <tr.IExecOptions>{
+            cwd: input_workingDirectory,
             failOnStdErr: false,
             errStream: process.stdout, // Direct all output to STDOUT, otherwise the output may appear out
             outStream: process.stdout, // of order since Node buffers it's own STDOUT but not STDERR.
@@ -128,8 +141,13 @@ async function run() {
         if (stderrFailure) {
             tl.setResult(tl.TaskResult.Failed, tl.loc('JS_Stderr'));
         }
+        telemetry.emitTelemetry("TaskHub", "AzurePowerShellV4", { targetAzurePs });
+        console.log("## Script Execution Complete"); 
     }
     catch (err) {
+        // troubleshoot link
+        const troubleshoot = "https://aka.ms/azurepowershelltroubleshooting";
+        console.log(`##[error] run failed: For troubleshooting, refer: ${troubleshoot}`);
         tl.setResult(tl.TaskResult.Failed, err.message || 'run() failed');
     }
 }

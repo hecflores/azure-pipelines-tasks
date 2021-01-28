@@ -1,10 +1,10 @@
 {
     "id": "C0E0B74F-0931-47C7-AC27-7C5A19456A36",
     "name": "JavaToolInstaller",
-    "friendlyName": "Java Tool Installer",
-    "description": "Acquires a specific version of Java from a user supplied Azure blob or the tools cache and sets JAVA_HOME. Use this task to change the version of Java used in Java tasks.",
-    "helpUrl": "https://go.microsoft.com/fwlink/?linkid=875287",
-    "helpMarkDown": "[More Information](https://go.microsoft.com/fwlink/?linkid=875287)",
+    "friendlyName": "Java tool installer",
+    "description": "Acquire a specific version of Java from a user-supplied Azure blob or the tool cache and sets JAVA_HOME",
+    "helpUrl": "https://docs.microsoft.com/azure/devops/pipelines/tasks/tool/java-tool-installer",
+    "helpMarkDown": "[Learn more about this task](https://go.microsoft.com/fwlink/?linkid=875287) or [see the Java documentation](https://docs.oracle.com/java/)",
     "category": "Tool",
     "runsOn": [
         "Agent",
@@ -13,11 +13,12 @@
     "author": "Microsoft Corporation",
     "version": {
         "Major": 0,
-        "Minor": 141,
-        "Patch": 2
+        "Minor": 182,
+        "Patch": 0
     },
     "satisfies": [
-        "Java"
+        "Java",
+        "JDK"
     ],
     "demands": [],
     "groups": [
@@ -55,7 +56,8 @@
             "required": true,
             "options": {
                 "AzureStorage": "Azure Storage",
-                "LocalDirectory": "Local Directory"
+                "LocalDirectory": "Local Directory",
+                "PreInstalled": "Pre-installed"
             },
             "helpMarkDown": "Source for the compressed JDK."
         },
@@ -111,7 +113,8 @@
             "label": "Destination directory",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "Destination directory into which JDK should be extracted."
+            "visibleRule": "jdkSourceOption != PreInstalled",
+            "helpMarkDown": "On Linux and Windows, this is used as the destination directory for JDK installation. On macOS, this directory is used as a temporary folder for extracting of .dmg's since macOS doesn't support installing of JDK to specific directory."
         },
         {
             "name": "cleanDestinationDirectory",
@@ -119,6 +122,7 @@
             "label": "Clean destination directory",
             "required": true,
             "defaultValue": "true",
+            "visibleRule": "jdkSourceOption != PreInstalled",
             "helpMarkDown": "Select this option to clean the destination directory before JDK is extracted into it."
         }
     ],
@@ -139,7 +143,7 @@
         }
     ],
     "execution": {
-        "Node": {
+        "Node10": {
             "target": "javatoolinstaller.js",
             "argumentFormat": ""
         }
@@ -169,6 +173,24 @@
         "UnsupportedFileExtension": "Specified JDK source file does not have a supported file extension.",
         "CouldNotFetchAccessTokenforAzureStatusCode": "Could not fetch access token for Azure. Status code: %s, status message: %s",
         "CouldNotFetchAccessTokenforMSIDueToMSINotConfiguredProperlyStatusCode": "Could not fetch access token for Managed Service Principal. Please configure Managed Service Identity (MSI) for virtual machine 'https://aka.ms/azure-msi-docs'. Status code: %s, status message: %s",
-        "CouldNotFetchAccessTokenforMSIStatusCode": "Could not fetch access token for Managed Service Principal. Status code: %s, status message: %s"
+        "CouldNotFetchAccessTokenforMSIStatusCode": "Could not fetch access token for Managed Service Principal. Status code: %s, status message: %s",
+        "ExpiredServicePrincipal": "Could not fetch access token for Azure. Verify if the Service Principal used is valid and not expired.",
+        "CorrelationIdForARM": "Correlation ID from ARM api call response : %s",
+        "JavaNotPreinstalled": "Java %s is not preinstalled on this agent",
+        "UsePreinstalledJava": "Use preinstalled JDK from %s",
+        "WrongArchiveStructure": "JDK file is not valid. Verify if JDK file contains only one root folder with 'bin' inside.",
+        "ShareAccessError": "Network shared resource not available: (%s)",
+        "UnsupportedDMGStructure": "JDK file is not supported. Verify if JDK file contains exactly one folder inside.",
+        "NoPKGFile": "Could not find PKG file.",
+        "SeveralPKGFiles": "Found more than one PKG files.",
+        "InstallJDK": "Installing JDK.",
+        "AttachDiskImage": "Attaching a disk image.",
+        "DetachDiskImage": "Detaching a disk image.",
+        "PkgPathDoesNotExist": "Package path does not exist.",
+        "PreInstalledJavaUpgraded": "Preinstalled JDK updated.",
+        "JavaSuccessfullyInstalled": "Java has been successfully installed",
+        "ArchiveWasExtractedEarlier": "Archive with JDK was extracted earlier - skipping extracting",
+        "ExtractingArchiveToPath": "Extracting archive to: %s",
+        "ErrorCleaningFolder": "Folder cleaning error: %s"
     }
 }

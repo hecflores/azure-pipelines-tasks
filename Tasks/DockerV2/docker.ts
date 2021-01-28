@@ -1,17 +1,15 @@
 "use strict";
 
 import path = require('path');
-import * as tl from "vsts-task-lib/task";
-import GenericAuthenticationTokenProvider from "docker-common/registryauthenticationprovider/genericauthenticationtokenprovider";
-import RegistryAuthenticationToken from "docker-common/registryauthenticationprovider/registryauthenticationtoken";
-import ContainerConnection from 'docker-common/containerconnection';
-import Q = require('q');
+import * as tl from "azure-pipelines-task-lib/task";
+import RegistryAuthenticationToken from "azure-pipelines-tasks-docker-common-v2/registryauthenticationprovider/registryauthenticationtoken";
+import ContainerConnection from "azure-pipelines-tasks-docker-common-v2/containerconnection";
+import { getDockerRegistryEndpointAuthenticationToken } from "azure-pipelines-tasks-docker-common-v2/registryauthenticationprovider/registryauthenticationtoken";
 
 tl.setResourcePath(path.join(__dirname, 'task.json'));
 
-let containerRegisitry = tl.getInput("containerRegistry");
-let authenticationProvider = new GenericAuthenticationTokenProvider(containerRegisitry);        
-let registryAuthenticationToken = authenticationProvider.getAuthenticationToken();
+let endpointId = tl.getInput("containerRegistry");
+let registryAuthenticationToken: RegistryAuthenticationToken = getDockerRegistryEndpointAuthenticationToken(endpointId);
 
 // Take the specified command
 let command = tl.getInput("command", true).toLowerCase();
@@ -26,11 +24,14 @@ let dockerCommandMap = {
     "build": "./dockerbuild",
     "push": "./dockerpush",
     "login": "./dockerlogin",
-    "logout": "./dockerlogout"
+    "logout": "./dockerlogout",
+    "start": "./dockerlifecycle",
+    "stop": "./dockerlifecycle"
 }
 
 let telemetry = {
-    command: command
+    command: command,
+    jobId: tl.getVariable('SYSTEM_JOBID')
 };
 
 console.log("##vso[telemetry.publish area=%s;feature=%s]%s",
@@ -46,7 +47,7 @@ if (command in dockerCommandMap) {
 
 let resultPaths = "";
 commandImplementation.run(connection, (pathToResult) => {
-    resultPaths += pathToResult;    
+    resultPaths += pathToResult;
 })
 /* tslint:enable:no-var-requires */
 .fin(function cleanup() {

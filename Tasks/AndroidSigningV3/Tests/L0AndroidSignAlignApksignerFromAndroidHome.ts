@@ -1,5 +1,5 @@
-import ma = require('vsts-task-lib/mock-answer');
-import tmrm = require('vsts-task-lib/mock-run');
+import ma = require('azure-pipelines-task-lib/mock-answer');
+import tmrm = require('azure-pipelines-task-lib/mock-run');
 import path = require('path');
 
 const taskPath = path.join(__dirname, '..', 'androidsigning.js');
@@ -22,7 +22,7 @@ const a: ma.TaskLibAnswers = <ma.TaskLibAnswers>{
         '/some/path/a.apk': [
             '/some/path/a.apk'
         ],
-        'apksigner*': [
+        'apksigner*\n!*.jar': [
             '/fake/android/home/sdk1/apksigner',
             '/fake/android/home/sdk2/apksigner'
         ]

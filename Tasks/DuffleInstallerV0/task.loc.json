@@ -9,12 +9,11 @@
     "Build",
     "Release"
   ],
-  "preview": true,
   "author": "Microsoft Corporation",
   "version": {
     "Major": 0,
-    "Minor": 0,
-    "Patch": 1
+    "Minor": 181,
+    "Patch": 0
   },
   "demands": [],
   "groups": [],
@@ -38,7 +37,7 @@
   ],
   "instanceNameFormat": "ms-resource:loc.instanceNameFormat",
   "execution": {
-    "Node": {
+    "Node10": {
       "target": "src//duffle.js"
     }
   },

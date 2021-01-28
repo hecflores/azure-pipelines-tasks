@@ -1,5 +1,5 @@
-import ma = require('vsts-task-lib/mock-answer');
-import tmrm = require('vsts-task-lib/mock-run');
+import ma = require('azure-pipelines-task-lib/mock-answer');
+import tmrm = require('azure-pipelines-task-lib/mock-run');
 import path = require('path');
 
 const DefaultWorkingDirectory: string = "C:\\a\\w\\";
@@ -25,6 +25,7 @@ tr.setInput("skipTempFileCleanupDuringVMDeprovision", "true");
 tr.setInput("isManagedImage","true")
 tr.setInput("managedImageName","builtInWinManagedImageName")
 
+process.env["ENDPOINT_URL_AzureRMSpn"] = "https://management.azure.com/";
 process.env["ENDPOINT_AUTH_SCHEME_AzureRMSpn"] = "ServicePrincipal";
 process.env["ENDPOINT_AUTH_PARAMETER_AzureRMSpn_SERVICEPRINCIPALID"] = "spId";
 process.env["ENDPOINT_AUTH_PARAMETER_AzureRMSpn_SERVICEPRINCIPALKEY"] = "spKey";
@@ -129,5 +130,5 @@ tr.registerMock('../utilities', utMock);
 
 tr.setAnswers(a);
 
-tr.registerMock('azure-arm-rest/azure-graph', require('./mock_node_modules/azure-graph'));
+tr.registerMock('azure-pipelines-tasks-azure-arm-rest-v2/azure-graph', require('./mock_node_modules/azure-graph'));
 tr.run();

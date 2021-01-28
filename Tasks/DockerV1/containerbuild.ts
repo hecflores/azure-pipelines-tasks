@@ -1,16 +1,14 @@
 "use strict";
 
 import * as path from "path";
-import * as tl from "vsts-task-lib/task";
-import * as fileUtils from "docker-common/fileutils";
-import * as pipelineUtils from "docker-common/pipelineutils";
-import ContainerConnection from "docker-common/containerconnection";
-import * as sourceUtils from "docker-common/sourceutils";
-import * as imageUtils from "docker-common/containerimageutils";
-import * as URL from 'url';
+import * as tl from "azure-pipelines-task-lib/task";
+import * as dockerCommandUtils from "azure-pipelines-tasks-docker-common-v2/dockercommandutils";
+import * as fileUtils from "azure-pipelines-tasks-docker-common-v2/fileutils";
+import * as pipelineUtils from "azure-pipelines-tasks-docker-common-v2/pipelineutils";
+import ContainerConnection from "azure-pipelines-tasks-docker-common-v2/containerconnection";
+import * as sourceUtils from "azure-pipelines-tasks-docker-common-v2/sourceutils";
+import * as imageUtils from "azure-pipelines-tasks-docker-common-v2/containerimageutils";
 import * as utils from "./utils";
-import * as util from "util";
-import { ToolRunner } from "vsts-task-lib/toolrunner";
 
 export function run(connection: ContainerConnection): any {
     var command = connection.createCommand();
@@ -30,7 +28,8 @@ export function run(connection: ContainerConnection): any {
         pipelineUtils.addDefaultLabelArgs(command);
     }
 
-    var commandArguments = tl.getInput("arguments", false); 
+    var commandArguments = dockerCommandUtils.getCommandArguments(tl.getInput("arguments", false));
+
     command.line(commandArguments);
     
     var imageName = utils.getImageName(); 

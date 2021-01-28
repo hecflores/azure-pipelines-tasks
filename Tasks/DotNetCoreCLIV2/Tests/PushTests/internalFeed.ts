@@ -1,17 +1,16 @@
-import ma = require('vsts-task-lib/mock-answer');
-import tmrm = require('vsts-task-lib/mock-run');
+import ma = require('azure-pipelines-task-lib/mock-answer');
+import tmrm = require('azure-pipelines-task-lib/mock-run');
 import path = require('path');
 import util = require('../DotnetMockHelper');
 
 let taskPath = path.join(__dirname, '../..', 'dotnetcore.js');
 let tmr: tmrm.TaskMockRunner = new tmrm.TaskMockRunner(taskPath);
 let nmh: util.DotnetMockHelper = new util.DotnetMockHelper(tmr);
-
 nmh.setNugetVersionInputDefault();
 tmr.setInput('command', 'push');
 tmr.setInput('searchPatternPush', 'foo.nupkg');
 tmr.setInput('nuGetFeedType', 'internal');
-tmr.setInput('feedPublish', 'FeedFooId');
+tmr.setInput('feedPublish', 'ProjectId/FeedFooId');
 
 let a: ma.TaskLibAnswers = <ma.TaskLibAnswers>{
     "osType": {},
@@ -48,7 +47,6 @@ let a: ma.TaskLibAnswers = <ma.TaskLibAnswers>{
     }
 };
 nmh.setAnswers(a);
-
 nmh.registerNugetUtilityMock(["c:\\agent\\home\\directory\\foo.nupkg"]);
 nmh.registerDefaultNugetVersionMock();
 nmh.registerToolRunnerMock();

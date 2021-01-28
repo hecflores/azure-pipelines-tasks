@@ -15,9 +15,35 @@
         $certificate.Import($pfxFilePath, $pfxFilePassword, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet)
     }
     else {
+        $pfxFilePassword = [System.String]::Empty
         $bytes = [System.Convert]::FromBase64String($Endpoint.Auth.Parameters.Certificate)
-        $certificate.Import($bytes)
+        $certificate.Import($bytes, $pfxFilePassword, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet)
     }
+
+    $store = New-Object System.Security.Cryptography.X509Certificates.X509Store(
+            ([System.Security.Cryptography.X509Certificates.StoreName]::My),
+            ([System.Security.Cryptography.X509Certificates.StoreLocation]::CurrentUser))
+    $store.Open(([System.Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite))
+    $store.Add($certificate)
+    $store.Close()
+    
+    #store the thumbprint in a global variable which will be used to remove the certificate later on
+    $script:Endpoint_Authentication_Certificate = $certificate.Thumbprint
+    Write-Verbose "Added certificate to the certificate store."
+    return $certificate
+}
+
+function Add-CertificateForAz {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)] $Endpoint
+    )
+
+    $pemFileContent = $Endpoint.Auth.Parameters.ServicePrincipalCertificate
+    $pfxFilePath, $pfxFilePassword = ConvertTo-Pfx -pemFileContent $pemFileContent
+   
+    # Add the certificate to the cert store.
+    $certificate = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($pfxFilePath, $pfxFilePassword, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet)
 
     $store = New-Object System.Security.Cryptography.X509Certificates.X509Store(
             ([System.Security.Cryptography.X509Certificates.StoreName]::My),
@@ -225,6 +251,9 @@ function ConvertTo-Pfx {
     }
 
     $openSSLExePath = "$PSScriptRoot\openssl\openssl.exe"
+    $env:OPENSSL_CONF = "$PSScriptRoot\openssl\openssl.cnf"
+    $env:RANDFILE=".rnd"
+    
     $openSSLArgs = "pkcs12 -export -in $pemFilePath -out $pfxFilePath -password file:`"$pfxPasswordFilePath`""
      
     Invoke-VstsTool -FileName $openSSLExePath -Arguments $openSSLArgs -RequireExitCodeZero
@@ -488,50 +517,68 @@ function Add-AzureStackAzureRmEnvironment {
 function Disconnect-AzureAndClearContext {
     [CmdletBinding()]
     param(
-        [string]$authScheme = 'ServicePrincipal'
+        [string]$authScheme = 'ServicePrincipal',
+        [string]$restrictContext = 'False'
     )
 
     try {
         if ($authScheme -eq 'ServicePrincipal') {
             Write-Verbose "Trying to disconnect from Azure and clear context at process scope"
 
-            if (Get-Command -Name "Disconnect-AzureRmAccount" -ErrorAction "SilentlyContinue" -and CmdletHasMember -cmdlet Disconnect-AzureRmAccount -memberName Scope) {	
-                Write-Host "##[command]Disconnect-AzureRmAccount -Scope Process -ErrorAction Stop"	
-                $null = Disconnect-AzureRmAccount -Scope Process -ErrorAction Stop
+            if (Get-Module Az.Accounts -ListAvailable) {
+                Disconnect-UsingAzModule -restrictContext $restrictContext
             }
-            elseif (Get-Command -Name "Disconnect-AzAccount" -ErrorAction "SilentlyContinue" -and CmdletHasMember -cmdlet Disconnect-AzAccount -memberName Scope) {	
-                Write-Host "##[command]Disconnect-AzAccount -Scope Process -ErrorAction Stop"	
-                $null = Disconnect-AzAccount -Scope Process -ErrorAction Stop
-            }
-            elseif (Get-Command -Name "Remove-AzureRmAccount" -ErrorAction "SilentlyContinue" -and CmdletHasMember -cmdlet Remove-AzureRmAccount -memberName Scope) {	
-                Write-Host "##[command]Remove-AzureRmAccount -Scope Process -ErrorAction Stop"	
-                $null = Remove-AzureRmAccount -Scope Process -ErrorAction Stop
-            }
-            elseif (Get-Command -Name "Remove-AzAccount" -ErrorAction "SilentlyContinue" -and CmdletHasMember -cmdlet Remove-AzAccount -memberName Scope) {	
-                Write-Host "##[command]Remove-AzAccount -Scope Process -ErrorAction Stop"	
-                $null = Remove-AzAccount -Scope Process -ErrorAction Stop
-            }	
-            elseif (Get-Command -Name "Logout-AzureRmAccount" -ErrorAction "SilentlyContinue" -and CmdletHasMember -cmdlet Logout-AzureRmAccount -memberName Scope) {	
-                Write-Host "##[command]Logout-AzureRmAccount -Scope Process -ErrorAction Stop"	
-                $null = Logout-AzureRmAccount -Scope Process -ErrorAction Stop
-            }
-            elseif (Get-Command -Name "Logout-AzAccount" -ErrorAction "SilentlyContinue" -and CmdletHasMember -cmdlet Logout-AzAccount -memberName Scope) {	
-                Write-Host "##[command]Logout-AzAccount -Scope Process -ErrorAction Stop"	
-                $null = Logout-AzAccount -Scope Process -ErrorAction Stop
-            }
-
-            if (Get-Command -Name "Clear-AzureRmContext" -ErrorAction "SilentlyContinue") {
-                Write-Host "##[command]Clear-AzureRmContext -Scope Process -ErrorAction Stop"
-                $null = Clear-AzureRmContext -Scope Process -ErrorAction Stop
-            }
-            if (Get-Command -Name "Clear-AzContext" -ErrorAction "SilentlyContinue") {
-                Write-Host "##[command]Clear-AzContext -Scope Process -ErrorAction Stop"
-                $null = Clear-AzContext -Scope Process -ErrorAction Stop
+            else {
+                Disconnect-UsingARMModule
             }
         }
     } catch {
         $message = $_.Exception.Message
         Write-Verbose "Unable to disconnect and clear context: $message"
         Write-Host "##vso[task.logissue type=warning;]$message"
+    }
+}
+
+function Disconnect-UsingAzModule {
+    [CmdletBinding()]
+    param(
+        [string]$restrictContext = 'False'
+    )
+
+    if (Get-Command -Name "Disconnect-AzAccount" -ErrorAction "SilentlyContinue" -and CmdletHasMember -cmdlet Disconnect-AzAccount -memberName Scope) {	
+        if ($restrictContext -eq 'True') {
+            Write-Host "##[command]Disconnect-AzAccount -Scope CurrentUser -ErrorAction Stop"
+            $null = Disconnect-AzAccount -Scope CurrentUser -ErrorAction Stop
+        }
+        Write-Host "##[command]Disconnect-AzAccount -Scope Process -ErrorAction Stop"	
+        $null = Disconnect-AzAccount -Scope Process -ErrorAction Stop
+    }
+
+    if (Get-Command -Name "Clear-AzContext" -ErrorAction "SilentlyContinue") {
+        Write-Host "##[command]Clear-AzContext -Scope Process -ErrorAction Stop"
+        $null = Clear-AzContext -Scope Process -ErrorAction Stop
+    }
+}
+
+function Disconnect-UsingARMModule {
+    [CmdletBinding()]
+    param()
+
+    if (Get-Command -Name "Disconnect-AzureRmAccount" -ErrorAction "SilentlyContinue" -and CmdletHasMember -cmdlet Disconnect-AzureRmAccount -memberName Scope) {	
+        Write-Host "##[command]Disconnect-AzureRmAccount -Scope Process -ErrorAction Stop"	
+        $null = Disconnect-AzureRmAccount -Scope Process -ErrorAction Stop
+    }
+    elseif (Get-Command -Name "Remove-AzureRmAccount" -ErrorAction "SilentlyContinue" -and CmdletHasMember -cmdlet Remove-AzureRmAccount -memberName Scope) {	
+        Write-Host "##[command]Remove-AzureRmAccount -Scope Process -ErrorAction Stop"	
+        $null = Remove-AzureRmAccount -Scope Process -ErrorAction Stop
+    }
+    elseif (Get-Command -Name "Logout-AzureRmAccount" -ErrorAction "SilentlyContinue" -and CmdletHasMember -cmdlet Logout-AzureRmAccount -memberName Scope) {	
+        Write-Host "##[command]Logout-AzureRmAccount -Scope Process -ErrorAction Stop"	
+        $null = Logout-AzureRmAccount -Scope Process -ErrorAction Stop
+    }
+
+    if (Get-Command -Name "Clear-AzureRmContext" -ErrorAction "SilentlyContinue") {
+        Write-Host "##[command]Clear-AzureRmContext -Scope Process -ErrorAction Stop"
+        $null = Clear-AzureRmContext -Scope Process -ErrorAction Stop
     }
 }

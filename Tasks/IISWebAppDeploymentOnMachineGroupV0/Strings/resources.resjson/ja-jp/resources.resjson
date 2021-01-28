@@ -1,6 +1,6 @@
 {
   "loc.friendlyName": "IIS Web アプリの配置",
-  "loc.helpMarkDown": "[詳細](https://go.microsoft.com/fwlink/?linkid=866789)",
+  "loc.helpMarkDown": "[Learn more about this task](https://go.microsoft.com/fwlink/?linkid=866789)",
   "loc.description": "Web 配置を使用して Web サイトまたは Web アプリケーションを配置する",
   "loc.instanceNameFormat": "IIS Web サイト/アプリを配置します: $(WebDeployPackage)",
   "loc.group.displayName.FileTransformsAndVariableSubstitution": "ファイルの変換と変数の置換のオプション",
@@ -57,7 +57,7 @@
   "loc.messages.MSDeploygeneratedpackageareonlysupportedforWindowsplatform": "MSDeploy 生成のパッケージは Windows プラットフォームでのみサポートされます。",
   "loc.messages.UnsupportedinstalledversionfoundforMSDeployversionshouldbeatleast3orabove": "MSDeploy のサポートされていないバージョン: %s がインストールされています。バージョンは 3 以降である必要があります",
   "loc.messages.UnabletofindthelocationofMSDeployfromregistryonmachineError": "コンピューター上のレジストリから、MS Deploy の場所を特定できません (エラー: %s)",
-  "loc.messages.Nopackagefoundwithspecifiedpattern": "指定したパターンのパッケージが見つかりませんでした",
+  "loc.messages.Nopackagefoundwithspecifiedpattern": "No package found with specified pattern.<br/>Check if the package mentioned in the task is published as an artifact in the build or a previous stage and downloaded in the current job.",
   "loc.messages.MorethanonepackagematchedwithspecifiedpatternPleaserestrainthesearchpattern": "指定したパターンと一致するパッケージが複数あります。検索パターンを絞り込んでください。",
   "loc.messages.Trytodeploywebappagainwithappofflineoptionselected": "app_offline オプションを選択して、もう一度 Web アプリを配置してください。",
   "loc.messages.Configfiledoesntexists": "構成ファイル %s がありません。",
@@ -73,5 +73,6 @@
   "loc.messages.FailedToApplyTransformationReason2": "2. 構成ファイルと変換ファイルがパッケージ内の同じフォルダーに存在すること。",
   "loc.messages.AutoParameterizationMessage": "Web.config の ConnectionString 属性は既定でパラメーター化されています。'Parameters.xml' ファイルまたは 'SetParameters.xml' ファイルによって値が配置中に上書きされるため、変換が connectionString 属性に影響を与えることはありません。自動パラメーター化は、MSBuild パッケージの生成中に /p:AutoParameterizationWebConfigConnectionStrings=False のように設定することによって無効にできます。",
   "loc.messages.PackageDeploymentFailed": "IIS Web サイトに Web パッケージを配置できませんでした。",
-  "loc.messages.Updatemachinetoenablesecuretlsprotocol": "マシンで TLS 1.2 プロトコル以上を使用していることを確認します。お使いのマシンで TLS を有効にする方法について詳しくは、https://aka.ms/enableTlsv2 をご確認ください。"
+  "loc.messages.Updatemachinetoenablesecuretlsprotocol": "マシンで TLS 1.2 プロトコル以上を使用していることを確認します。お使いのマシンで TLS を有効にする方法について詳しくは、https://aka.ms/enableTlsv2 をご確認ください。",
+  "loc.messages.RetryToDeploy": "パッケージの配置を再試行しています。"
 }

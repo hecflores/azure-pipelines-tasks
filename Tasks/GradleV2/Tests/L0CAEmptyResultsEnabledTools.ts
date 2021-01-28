@@ -1,5 +1,5 @@
-import ma = require('vsts-task-lib/mock-answer');
-import tmrm = require('vsts-task-lib/mock-run');
+import * as ma from 'azure-pipelines-task-lib/mock-answer';
+import * as tmrm from 'azure-pipelines-task-lib/mock-run';
 import path = require('path');
 
 let taskPath = path.join(__dirname, '..', 'gradletask.js');
@@ -50,11 +50,11 @@ tr.setInput('findbugsAnalysisEnabled', 'false');
 //construct a string that is JSON, call JSON.parse(string), send that to ma.TaskLibAnswers
 let myAnswers: string = `{
    "exec":{
-        "gradlew build -I /GradleV2/node_modules/codeanalysis-common/pmd.gradle": {
+        "gradlew build -I /GradleV2/node_modules/azure-pipelines-tasks-codeanalysis-common/pmd.gradle": {
             "code": 0,
             "stdout": "Sample gradle + PMD"
         },
-        "gradlew.bat build -I /GradleV2/node_modules/codeanalysis-common/pmd.gradle": {
+        "gradlew.bat build -I /GradleV2/node_modules/azure-pipelines-tasks-codeanalysis-common/pmd.gradle": {
             "code": 0,
             "stdout": "Sample gradle + PMD"
         }

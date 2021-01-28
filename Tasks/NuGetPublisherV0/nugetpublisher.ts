@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as Q  from "q";
-import * as tl from "vsts-task-lib/task";
+import * as tl from "azure-pipelines-task-lib/task";
 
 import * as auth from "packaging-common/nuget/Authentication";
 import INuGetCommandOptions from "packaging-common/nuget/INuGetCommandOptions";
@@ -9,6 +9,7 @@ import * as ngToolGetter from "packaging-common/nuget/NuGetToolGetter";
 import * as ngToolRunner from "packaging-common/nuget/NuGetToolRunner";
 import * as nutil from "packaging-common/nuget/Utility";
 import * as pkgLocationUtils from "packaging-common/locationUtilities";
+import { logError } from 'packaging-common/util';
 
 class PublishOptions implements INuGetCommandOptions {
     constructor(
@@ -27,12 +28,9 @@ async function main(): Promise<void> {
     try {
         packagingLocation = await pkgLocationUtils.getPackagingUris(pkgLocationUtils.ProtocolType.NuGet);
     } catch (error) {
-        tl.debug("Unable to get packaging URIs, using default collection URI");
-        tl.debug(JSON.stringify(error));
-        const collectionUrl = tl.getVariable("System.TeamFoundationCollectionUri");
-        packagingLocation = {
-            PackagingUris: [collectionUrl],
-            DefaultPackagingUri: collectionUrl};
+        tl.debug("Unable to get packaging URIs");
+        logError(error);
+        throw error;
     }
 
     let buildIdentityDisplayName: string = null;

@@ -2,9 +2,9 @@ import { ISqlClient } from './ISqlClient';
 import { FirewallConfiguration } from '../models/FirewallConfiguration';
 import { AzureMysqlTaskParameter } from '../models/AzureMysqlTaskParameter';
 import { Utility } from '../operations/MysqlUtiliy';
-import * as telemetry from 'utility-common/telemetry';
-import task = require("vsts-task-lib/task");
-var packageUtility = require('webdeployment-common/packageUtility.js');
+import * as telemetry from '../telemetry';
+import task = require("azure-pipelines-task-lib/task");
+var packageUtility = require('webdeployment-common-v2/packageUtility.js');
 import Q = require('q');
 
 export class MysqlClient implements ISqlClient {
@@ -73,8 +73,8 @@ export class MysqlClient implements ISqlClient {
                 },(error) => {
                     defer.reject(error);
                 });
-            },(error) => {
-                defer.reject(new Error(task.loc("UnableToCreateDatabaseException")));
+            }).catch((error) => {
+                defer.reject(error);
             });
         }else{
             argument += this._azureMysqlTaskParameter.getDatabaseName() ? " -D" + this._azureMysqlTaskParameter.getDatabaseName() : "";
@@ -125,7 +125,7 @@ export class MysqlClient implements ISqlClient {
             fileSourceArgument = " -e" + '"' + this._azureMysqlTaskParameter.getSqlInline() + '"';
         }
         else {
-            fileSourceArgument = " -e" + '" source ' + packageUtility.PackageUtility.getPackagePath(this._azureMysqlTaskParameter.getSqlFile()) + '"';
+            fileSourceArgument = ` -e "source ${packageUtility.PackageUtility.getPackagePath(this._azureMysqlTaskParameter.getSqlFile())};"`;
         }
        
         return  fileSourceArgument;       

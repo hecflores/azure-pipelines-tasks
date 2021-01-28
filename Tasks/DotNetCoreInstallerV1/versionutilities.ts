@@ -1,6 +1,6 @@
 import * as path from 'path';
-import * as tl from 'vsts-task-lib/task';
-import * as toolLib from 'vsts-task-tool-lib';
+import * as tl from 'azure-pipelines-task-lib/task';
+import * as toolLib from 'azure-pipelines-tool-lib';
 import * as semver from 'semver';
 import { VersionInfo } from "./models"
 
@@ -45,8 +45,8 @@ export function compareChannelVersion(channelVersionA: string, channelVersionB: 
 export function getMatchingVersionFromList(versionInfoList: VersionInfo[], versionSpec: string, includePreviewVersions: boolean = false): VersionInfo {
     let versionList: string[] = [];
     versionInfoList.forEach(versionInfo => {
-        if (versionInfo && versionInfo.version) {
-            versionList.push(versionInfo.version);
+        if (versionInfo && versionInfo.getVersion()) {
+            versionList.push(versionInfo.getVersion());
         }
     });
 
@@ -54,7 +54,7 @@ export function getMatchingVersionFromList(versionInfoList: VersionInfo[], versi
         let matchedVersion = semver.maxSatisfying(versionList, versionSpec, { includePrerelease: includePreviewVersions });
         if (matchedVersion) {
             return versionInfoList.find(versionInfo => {
-                return versionInfo.version == matchedVersion
+                return versionInfo.getVersion() == matchedVersion
             });
         }
     }

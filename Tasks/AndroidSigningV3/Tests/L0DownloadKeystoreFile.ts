@@ -1,5 +1,5 @@
-import ma = require('vsts-task-lib/mock-answer');
-import tmrm = require('vsts-task-lib/mock-run');
+import ma = require('azure-pipelines-task-lib/mock-answer');
+import tmrm = require('azure-pipelines-task-lib/mock-run');
 import path = require('path');
 import fs = require('fs');
 
@@ -11,8 +11,8 @@ tr.setInput('keystoreFile', 'mySecureFileId');
 
 process.env['AGENT_VERSION'] = '2.116.0';
 
-const secureFileHelperMock = require('securefiles-common/securefiles-common-mock');
-tr.registerMock('securefiles-common/securefiles-common', secureFileHelperMock);
+const secureFileHelperMock = require('azure-pipelines-tasks-securefiles-common/securefiles-common-mock');
+tr.registerMock('azure-pipelines-tasks-securefiles-common/securefiles-common', secureFileHelperMock);
 
 tr.registerMock('fs', {
     writeFileSync: function (filePath, contents) {

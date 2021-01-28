@@ -1,17 +1,17 @@
-import tmrm = require('vsts-task-lib/mock-run');
-import VersionInfoVersion from 'packaging-common/pe-parser/VersionInfoVersion'
-import {VersionInfo} from 'packaging-common/pe-parser/VersionResource'
+import tmrm = require('azure-pipelines-task-lib/mock-run');
+import VersionInfoVersion from 'azure-pipelines-tasks-packaging-common/pe-parser/VersionInfoVersion'
+import { VersionInfo } from 'azure-pipelines-tasks-packaging-common/pe-parser/VersionResource'
 
-import * as pkgMock from 'packaging-common/Tests/MockHelper';
+import * as pkgMock from 'azure-pipelines-tasks-packaging-common/Tests/MockHelper';
 
 export class DotnetMockHelper {
     private defaultNugetVersion = '4.0.0';
-    private defaultNugetVersionInfo = [4,0,0,0];
+    private defaultNugetVersionInfo = [4, 0, 0, 0];
 
     constructor(private tmr: tmrm.TaskMockRunner) {
         process.env['AGENT_HOMEDIRECTORY'] = "c:\\agent\\home\\directory";
         process.env['AGENT.TEMPDIRECTORY'] = "c:\\agent\\home\\temp";
-        process.env['BUILD_SOURCESDIRECTORY'] = "c:\\agent\\home\\directory\\sources",
+        process.env['BUILD_SOURCESDIRECTORY'] = "c:\\agent\\home\\directory\\sources";
         process.env['ENDPOINT_AUTH_SYSTEMVSSCONNECTION'] = "{\"parameters\":{\"AccessToken\":\"token\"},\"scheme\":\"OAuth\"}";
         process.env['ENDPOINT_URL_SYSTEMVSSCONNECTION'] = "https://example.visualstudio.com/defaultcollection";
         process.env['SYSTEM_DEFAULTWORKINGDIRECTORY'] = "c:\\agent\\home\\directory";
@@ -30,17 +30,17 @@ export class DotnetMockHelper {
     }
 
     public registerNugetToolGetterMock() {
-        this.tmr.registerMock('packaging-common/nuget/NuGetToolGetter', {
-            getNuGet: function(versionSpec) {
+        this.tmr.registerMock('azure-pipelines-tasks-packaging-common/nuget/NuGetToolGetter', {
+            getNuGet: function (versionSpec) {
                 return "c:\\from\\tool\\installer\\nuget.exe";
             },
-        } )
+        })
     }
 
     public registerNugetVersionMock(productVersion: string, versionInfoVersion: number[]) {
         this.registerNugetVersionMockInternal(productVersion, versionInfoVersion);
-        this.registerMockWithMultiplePaths(['packaging-common/pe-parser', './pe-parser'], {
-            getFileVersionInfoAsync: function(nuGetExePath) {
+        this.registerMockWithMultiplePaths(['azure-pipelines-tasks-packaging-common/pe-parser', './pe-parser'], {
+            getFileVersionInfoAsync: function (nuGetExePath) {
                 let result: VersionInfo = { strings: {} };
                 result.fileVersion = new VersionInfoVersion(versionInfoVersion[0], versionInfoVersion[1], versionInfoVersion[2], versionInfoVersion[3]);
                 result.strings['ProductVersion'] = productVersion;
@@ -55,8 +55,8 @@ export class DotnetMockHelper {
     }
 
     private registerNugetVersionMockInternal(productVersion: string, versionInfoVersion: number[]) {
-        this.registerMockWithMultiplePaths(['packaging-common/pe-parser/index', './pe-parser/index'], {
-            getFileVersionInfoAsync: function(nuGetExePath) {
+        this.registerMockWithMultiplePaths(['azure-pipelines-tasks-packaging-common/pe-parser/index', './pe-parser/index'], {
+            getFileVersionInfoAsync: function (nuGetExePath) {
                 let result: VersionInfo = { strings: {} };
                 result.fileVersion = new VersionInfoVersion(versionInfoVersion[0], versionInfoVersion[1], versionInfoVersion[2], versionInfoVersion[3]);
                 result.productVersion = new VersionInfoVersion(versionInfoVersion[0], versionInfoVersion[1], versionInfoVersion[2], versionInfoVersion[3]);
@@ -67,22 +67,26 @@ export class DotnetMockHelper {
     }
 
     public registerNugetUtilityMock(projectFile: string[]) {
-        this.tmr.registerMock('packaging-common/nuget/Utility', {
-            getPatternsArrayFromInput: function(input) {
+        this.tmr.registerMock('azure-pipelines-tasks-packaging-common/nuget/Utility', {
+            getPatternsArrayFromInput: function (input) {
                 return [`fromMockedUtility-${input}`];
             },
-            resolveFilterSpec: function(filterSpec, basePath?, allowEmptyMatch?) {
+            resolveFilterSpec: function (filterSpec, basePath?, allowEmptyMatch?) {
                 return projectFile;
             },
-            stripLeadingAndTrailingQuotes: function(path) {
+            stripLeadingAndTrailingQuotes: function (path) {
                 return path;
             },
             getNuGetFeedRegistryUrl(
                 packagingCollectionUrl: string,
                 feedId: string,
+                project: string,
                 nuGetVersion: VersionInfo,
                 accessToken?: string,
                 useSession?: boolean) {
+                if (project) {
+                    console.log("Using project scope " + project);
+                }
                 if (useSession) {
                     console.log("Using session registry url");
                 }
@@ -92,9 +96,9 @@ export class DotnetMockHelper {
                 return 'https://vsts/packagesource';
             }
         });
-        
+
         this.tmr.registerMock('./Utility', {
-            resolveToolPath: function(path) {
+            resolveToolPath: function (path) {
                 return path;
             }
         });
@@ -102,15 +106,15 @@ export class DotnetMockHelper {
 
     public registerVstsNuGetPushRunnerMock() {
         this.tmr.registerMock('./Common/VstsNuGetPushToolUtilities', {
-            getBundledVstsNuGetPushLocation: function() {
+            getBundledVstsNuGetPushLocation: function () {
                 return 'c:\\agent\\home\\directory\\externals\\nuget\\VstsNuGetPush.exe';
             }
         });
     }
 
-        public registerNuGetPackUtilsMock() {
-        this.tmr.registerMock( "packaging-common/PackUtilities", {
-            getUtcDateString: function() {
+    public registerNuGetPackUtilsMock() {
+        this.tmr.registerMock("azure-pipelines-tasks-packaging-common/PackUtilities", {
+            getUtcDateString: function () {
                 return 'YYYYMMDD-HHMMSS';
             }
         });
@@ -118,26 +122,26 @@ export class DotnetMockHelper {
 
     public registerNugetConfigMock() {
         var nchm = require('./NuGetConfigHelper-mock');
-        this.tmr.registerMock('packaging-common/nuget/NuGetConfigHelper2', nchm);
+        this.tmr.registerMock('azure-pipelines-tasks-packaging-common/nuget/NuGetConfigHelper2', nchm);
     }
 
     public registerToolRunnerMock() {
-        var mtt = require('vsts-task-lib/mock-toolrunner');
-        this.tmr.registerMock('vsts-task-lib/toolrunner', mtt);
+        var mtt = require('azure-pipelines-task-lib/mock-toolrunner');
+        this.tmr.registerMock('azure-pipelines-task-lib/toolrunner', mtt);
     }
 
     public RegisterLocationServiceMocks() {
-        this.tmr.registerMock('vso-node-api/WebApi', {
-            getBearerHandler: function(token){
+        this.tmr.registerMock('azure-devops-node-api/WebApi', {
+            getBearerHandler: function (token) {
                 return {};
             },
-            WebApi: function(url, handler){
+            WebApi: function (url, handler) {
                 return {
-                    getCoreApi: function() {
+                    getCoreApi: function () {
                         return {
                             vsoClient: {
                                 getVersioningData: function (ApiVersion, PackagingAreaName, PackageAreaId, Obj) {
-                                    return { requestUrl:"foobar" }
+                                    return { requestUrl: "foobar" }
                                 }
                             }
                         };
@@ -156,7 +160,7 @@ export class DotnetMockHelper {
     }
 
     private registerMockWithMultiplePaths(paths: string[], mock: any) {
-        for(let i = 0; i < paths.length; i++) {
+        for (let i = 0; i < paths.length; i++) {
             this.tmr.registerMock(paths[i], mock);
         }
     }

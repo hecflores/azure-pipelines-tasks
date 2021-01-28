@@ -1,10 +1,10 @@
 import * as util from 'util';
-import * as taskLib from 'vsts-task-lib/task';
+import * as taskLib from 'azure-pipelines-task-lib/task';
 
 import httpClient = require("typed-rest-client/HttpClient");
 import httpInterfaces = require("typed-rest-client/Interfaces");
 import { HttpClientResponse } from 'typed-rest-client/HttpClient';
-import * as trm from 'vsts-task-lib/toolrunner';
+import * as trm from 'azure-pipelines-task-lib/toolrunner';
 
 import * as os from 'os';
 import * as path from 'path';
@@ -53,6 +53,7 @@ export class DotNetCoreReleaseFetcher {
         }
         else {
             console.log(taskLib.loc("WarningVersionNotFound", version));
+            taskLib.warning(taskLib.loc('UpdateToNewerVersion', version));
             downloadUrls = this.getFallbackDownloadUrls(type, version);
         }
 
@@ -145,4 +146,4 @@ export class DotNetCoreReleaseFetcher {
     }
 }
 
-const DotNetCoreReleasesUrl: string = "https://raw.githubusercontent.com/dotnet/core/master/release-notes/releases.json";
+const DotNetCoreReleasesUrl: string = "https://raw.githubusercontent.com/microsoft/azure-pipelines-tasks/master/Tasks/DotNetCoreInstallerV0/externals/releases.json";

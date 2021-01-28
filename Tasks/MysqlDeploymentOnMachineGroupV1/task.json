@@ -1,27 +1,26 @@
 {
     "id": "6FEC3938-DF52-4C01-9F5A-8ED5F66C377E",
     "name": "MysqlDeploymentOnMachineGroup",
-    "friendlyName": "MySQL Database Deploy",
-    "description": "This is an early preview. Run your scripts and make changes to your MySQL Database.",
-    "helpUrl": "https://aka.ms/mysql-deployment-on-machine-group",
-    "helpMarkDown": "[More Information](https://aka.ms/mysql-deployment-on-machine-group)",
+    "friendlyName": "MySQL database deploy",
+    "description": "Run scripts and make changes to a MySQL Database",
+    "helpUrl": "https://docs.microsoft.com/azure/devops/pipelines/tasks",
+    "helpMarkDown": "[Learn more about this task](https://aka.ms/mysql-deployment-on-machine-group)",
     "category": "Deploy",
     "visibility": [
-        "Preview",
         "Release"
     ],
     "runsOn": [
+        "Agent",
         "DeploymentGroup"
     ],
     "author": "Microsoft Corporation",
     "version": {
         "Major": 1,
-        "Minor": 0,
-        "Patch": 2
+        "Minor": 182,
+        "Patch": 0
     },
     "demands": [],
     "minimumAgentVersion": "1.100.0",
-    "preview": true,
     "groups": [],
     "inputs": [
         {
@@ -118,6 +117,7 @@
         "CallbackCannotBeNull": "The callback cannot be null.",
         "UnableToCreateDatabaseException": "Unable to create database.",
         "WindowMysqlClientMissingError": "MySQL client is missing on the Windows agent machine. Please install it by running the MySQL client installer 'https://aka.ms/window-mysqlcli-installer' script file on the agent machine.",
-        "LinuxMysqlClientMissingError": "MySQL client is missing on the Linux agent machine. Please install it by running 'sudo apt-get install mysql-client'."
+        "LinuxMysqlClientMissingError": "MySQL client is missing on the Linux agent machine. Please install it by running 'sudo apt-get install mysql-client'.",
+        "Nopackagefoundwithspecifiedpattern": "No package found with specified pattern"
     }
 }

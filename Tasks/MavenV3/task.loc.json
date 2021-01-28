@@ -3,7 +3,7 @@
   "name": "Maven",
   "friendlyName": "ms-resource:loc.friendlyName",
   "description": "ms-resource:loc.description",
-  "helpUrl": "https://go.microsoft.com/fwlink/?LinkID=613723",
+  "helpUrl": "https://docs.microsoft.com/azure/devops/pipelines/tasks/build/maven",
   "helpMarkDown": "ms-resource:loc.helpMarkDown",
   "category": "Build",
   "visibility": [
@@ -17,7 +17,7 @@
   "author": "Microsoft Corporation",
   "version": {
     "Major": 3,
-    "Minor": 149,
+    "Minor": 181,
     "Patch": 1
   },
   "releaseNotes": "ms-resource:loc.releaseNotes",
@@ -172,6 +172,19 @@
       "visibleRule": "codeCoverageTool != None"
     },
     {
+      "name": "restoreOriginalPomXml",
+      "aliases": [
+        "codeCoverageRestoreOriginalPomXml"
+      ],
+      "type": "boolean",
+      "label": "ms-resource:loc.input.label.restoreOriginalPomXml",
+      "defaultValue": "false",
+      "required": false,
+      "groupName": "codeCoverage",
+      "helpMarkDown": "ms-resource:loc.input.help.restoreOriginalPomXml",
+      "visibleRule": "codeCoverageTool != None"
+    },
+    {
       "name": "javaHomeSelection",
       "aliases": [
         "javaHomeOption"
@@ -303,6 +316,18 @@
       "helpMarkDown": "ms-resource:loc.input.help.mavenFeedAuthenticate"
     },
     {
+      "name": "skipEffectivePom",
+      "aliases": [
+        "effectivePomSkip"
+      ],
+      "type": "boolean",
+      "label": "ms-resource:loc.input.label.skipEffectivePom",
+      "required": true,
+      "defaultValue": "false",
+      "groupName": "advanced",
+      "helpMarkDown": "ms-resource:loc.input.help.skipEffectivePom"
+    },
+    {
       "name": "sqAnalysisEnabled",
       "aliases": [
         "sonarQubeRunAnalysis"
@@ -313,6 +338,16 @@
       "defaultValue": "false",
       "groupName": "CodeAnalysis",
       "helpMarkDown": "ms-resource:loc.input.help.sqAnalysisEnabled"
+    },
+    {
+      "name": "isJacocoCoverageReportXML",
+      "type": "boolean",
+      "label": "ms-resource:loc.input.label.isJacocoCoverageReportXML",
+      "defaultValue": "false",
+      "required": false,
+      "groupName": "CodeAnalysis",
+      "helpMarkDown": "ms-resource:loc.input.help.isJacocoCoverageReportXML",
+      "visibleRule": "and(sqAnalysisEnabled = true, codeCoverageTool = JaCoCo) "
     },
     {
       "name": "sqMavenPluginVersionChoice",
@@ -366,7 +401,7 @@
     }
   ],
   "execution": {
-    "Node": {
+    "Node10": {
       "target": "maventask.js",
       "argumentFormat": ""
     }

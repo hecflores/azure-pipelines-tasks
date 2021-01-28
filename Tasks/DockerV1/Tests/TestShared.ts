@@ -1,4 +1,4 @@
-import tl = require('vsts-task-lib');
+import tl = require('azure-pipelines-task-lib');
 
 export let TestEnvVars = {
     operatingSystem: "__operating_system__",
@@ -11,7 +11,8 @@ export let TestEnvVars = {
     memoryLimit: "__memoryLimit__",
     pushMultipleImages: "__pushMultipleImages__",
     tagMultipleImages: "__tagMultipleImages__",
-    arguments: "__arguments__"
+    arguments: "__arguments__",
+    qualifySourceImageName: "__qualifySourceImageName__"
 };
 
 export let OperatingSystems = {

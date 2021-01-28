@@ -2,24 +2,13 @@
     "common": [
         {
             "module": "../Common/MSBuildHelpers",
-            "type": "node",
-            "compile": true
-        },
-        {
-            "module": "../Common/MSBuildHelpers",
             "type": "ps"
-        },
-        {
-            "module": "../Common/java-common",
-            "type": "node",
-            "compile": true
         }
     ],
     "rm": [
         {
             "items": [
-                "node_modules/msbuildhelpers/node_modules/vsts-task-lib",
-                "node_modules/java-common/node_modules/vsts-task-lib"
+                "node_modules/azure-pipelines-tasks-java-common/node_modules/azure-pipelines-task-lib"
             ],
             "options": "-Rf"
         }

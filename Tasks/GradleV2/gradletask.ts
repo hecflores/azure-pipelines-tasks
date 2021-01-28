@@ -1,23 +1,21 @@
-﻿import tl = require('vsts-task-lib/task');
+﻿import * as tl from 'azure-pipelines-task-lib/task';
 import fs = require('fs');
 import path = require('path');
 import Q = require('q');
 import os = require('os');
 
-import { ToolRunner } from 'vsts-task-lib/toolrunner';
-import { IExecOptions } from 'vsts-task-lib/toolrunner';
+import { ToolRunner, IExecOptions } from 'azure-pipelines-task-lib/toolrunner';
 
-import sqGradle = require('codeanalysis-common/gradlesonar');
-import { CodeAnalysisOrchestrator } from 'codeanalysis-common/Common/CodeAnalysisOrchestrator';
-import { BuildOutput, BuildEngine } from 'codeanalysis-common/Common/BuildOutput';
-import { PmdTool } from 'codeanalysis-common/Common/PmdTool';
-import { CheckstyleTool } from 'codeanalysis-common/Common/CheckstyleTool';
-import { FindbugsTool } from 'codeanalysis-common/Common/FindbugsTool';
-import { CodeCoverageEnablerFactory } from 'codecoverage-tools/codecoveragefactory';
-import { ICodeCoverageEnabler } from 'codecoverage-tools/codecoverageenabler';
-import ccUtil = require('codecoverage-tools/codecoverageutilities');
-import javacommons = require('java-common/java-common');
-import systemToken = require('utility-common/accesstoken');
+import sqGradle = require('azure-pipelines-tasks-codeanalysis-common/gradlesonar');
+import { CodeAnalysisOrchestrator } from 'azure-pipelines-tasks-codeanalysis-common/Common/CodeAnalysisOrchestrator';
+import { BuildOutput, BuildEngine } from 'azure-pipelines-tasks-codeanalysis-common/Common/BuildOutput';
+import { PmdTool } from 'azure-pipelines-tasks-codeanalysis-common/Common/PmdTool';
+import { CheckstyleTool } from 'azure-pipelines-tasks-codeanalysis-common/Common/CheckstyleTool';
+import { FindbugsTool } from 'azure-pipelines-tasks-codeanalysis-common/Common/FindbugsTool';
+import { CodeCoverageEnablerFactory } from 'azure-pipelines-tasks-codecoverage-tools/codecoveragefactory';
+import { ICodeCoverageEnabler } from 'azure-pipelines-tasks-codecoverage-tools/codecoverageenabler';
+import ccUtil = require('azure-pipelines-tasks-codecoverage-tools/codecoverageutilities');
+import javacommons = require('azure-pipelines-tasks-java-common/java-common');
 
 // Setting the access token env var to both VSTS and AZURE_ARTIFACTS for 
 // backwards compatibility with repos that already use the older env var.
@@ -53,7 +51,7 @@ function publishTestResults(publishJUnitResults: boolean, testResultsFiles: stri
 
         let tp: tl.TestPublisher = new tl.TestPublisher('JUnit');
         const testRunTitle = tl.getInput('testRunTitle');
-        tp.publish(matchingTestResultsFiles, true, '', '', testRunTitle, true, TESTRUN_SYSTEM);
+        tp.publish(matchingTestResultsFiles, 'true', '', '', testRunTitle, 'true', TESTRUN_SYSTEM);
     }
 }
 
@@ -161,10 +159,21 @@ function setJavaHome(javaHomeSelection: string): void {
 
 function getExecOptions(): IExecOptions {
     var env = process.env;
-    env[accessTokenEnvSetting] = env[accessTokenEnvSettingLegacy] = systemToken.getSystemAccessToken();
+    env[accessTokenEnvSetting] = env[accessTokenEnvSettingLegacy] = getSystemAccessToken();
     return <IExecOptions> {
         env: env,
     };
+}
+
+function getSystemAccessToken(): string {
+    tl.debug('Getting credentials for account feeds');
+    let auth = tl.getEndpointAuthorization('SYSTEMVSSCONNECTION', false);
+    if (auth && auth.scheme === 'OAuth') {
+        tl.debug('Got auth token');
+        return auth.parameters['AccessToken'];
+    }
+    tl.warning(tl.loc('FeedTokenUnavailable'));
+    return '';
 }
 
 async function run() {

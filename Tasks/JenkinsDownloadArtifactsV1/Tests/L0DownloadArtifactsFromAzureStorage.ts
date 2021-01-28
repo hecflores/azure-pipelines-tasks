@@ -1,7 +1,7 @@
-import ma = require('vsts-task-lib/mock-answer');
-import tmrm = require('vsts-task-lib/mock-run');
+import ma = require('azure-pipelines-task-lib/mock-answer');
+import tmrm = require('azure-pipelines-task-lib/mock-run');
 import path = require('path');
-import mockTask = require('vsts-task-lib/mock-task');
+import mockTask = require('azure-pipelines-task-lib/mock-task');
 
 const taskPath = path.join(__dirname, '..', 'jenkinsdownloadartifacts.js');
 const tr: tmrm.TaskMockRunner = new tmrm.TaskMockRunner(taskPath);
@@ -34,7 +34,7 @@ process.env['ENDPOINT_DATA_ARM1_ENVIRONMENTAUTHORITYURL'] = 'dummyurl';
 process.env['ENDPOINT_DATA_ARM1_ACTIVEDIRECTORYSERVICEENDPOINTRESOURCEID'] = 'dummyResourceId';
 process.env['ENDPOINT_DATA_ARM1_SUBSCRIPTIONID'] = 'dummySubscriptionId';
 
-tr.registerMock("azure-arm-rest/azure-arm-storage", {
+tr.registerMock("azure-pipelines-tasks-azure-arm-rest/azure-arm-storage", {
     StorageManagementClient: function (A, B) {
         return {
             storageAccounts: {
@@ -68,13 +68,13 @@ tr.registerMock("azure-arm-rest/azure-arm-storage", {
     }
 });
 
-tr.registerMock("azure-arm-rest/azure-arm-common", {
+tr.registerMock("azure-pipelines-tasks-azure-arm-rest/azure-arm-common", {
     ApplicationTokenCredentials: function(A,B,C,D,E,F,G) {
         return {};
     }
 });
 
-tr.registerMock("azure-blobstorage-artifactProvider/blobservice", {
+tr.registerMock("./blobservice", {
     BlobService: function(A,B) {
         return {
             downloadBlobs: function(A,B,C,D) {

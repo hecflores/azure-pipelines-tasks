@@ -1,15 +1,17 @@
-import { IExecSyncResult, IExecOptions } from "vsts-task-lib/toolrunner";
-import * as artifactToolRunner from "packaging-common/universal/ArtifactToolRunner";
-import * as tl from "vsts-task-lib";
-import * as telemetry from "utility-common/telemetry";
-import * as artifactToolUtilities from "packaging-common/universal/ArtifactToolUtilities";
-import * as pkgLocationUtils from "packaging-common/locationUtilities";
+import * as tl from "azure-pipelines-task-lib";
+import { IExecSyncResult, IExecOptions } from "azure-pipelines-task-lib/toolrunner";
+import * as artifactToolRunner from "azure-pipelines-tasks-packaging-common/universal/ArtifactToolRunner";
+import * as telemetry from "azure-pipelines-tasks-utility-common/telemetry";
+import * as artifactToolUtilities from "azure-pipelines-tasks-packaging-common/universal/ArtifactToolUtilities";
+import * as pkgLocationUtils from "azure-pipelines-tasks-packaging-common/locationUtilities";
 
 export async function downloadUniversalPackage(
     downloadPath: string,
+    projectId: string,
     feedId: string,
     packageId: string,
-    version: string
+    version: string,
+    filterPattern: string
 ): Promise<void> {
     try {
         const accessToken = pkgLocationUtils.getSystemAccessToken();
@@ -27,6 +29,7 @@ export async function downloadUniversalPackage(
         let packageName: string = await artifactToolUtilities.getPackageNameFromId(
             feedUri,
             accessToken,
+            projectId,
             feedId,
             packageId
         );
@@ -35,6 +38,7 @@ export async function downloadUniversalPackage(
 
         const downloadOptions = {
             artifactToolPath,
+            projectId,
             feedId,
             accountUrl: serviceUri,
             packageName,
@@ -43,7 +47,7 @@ export async function downloadUniversalPackage(
 
         let toolRunnerOptions = artifactToolRunner.getOptions();
         toolRunnerOptions.env.UNIVERSAL_DOWNLOAD_PAT = accessToken;
-        downloadPackageUsingArtifactTool(downloadPath, downloadOptions, toolRunnerOptions);
+        downloadPackageUsingArtifactTool(downloadPath, downloadOptions, toolRunnerOptions, filterPattern);
     } catch (error) {
         tl.setResult(tl.TaskResult.Failed, error.message);
         return;
@@ -51,6 +55,7 @@ export async function downloadUniversalPackage(
         _logUniversalStartupVariables({
             ArtifactToolPath: artifactToolPath,
             PackageType: "Universal",
+            ProjectId: projectId,
             FeedId : feedId,
             PackageId: packageId,
             Version: version,
@@ -62,20 +67,28 @@ export async function downloadUniversalPackage(
 function downloadPackageUsingArtifactTool(
     downloadPath: string,
     options: artifactToolRunner.IArtifactToolOptions,
-    execOptions: IExecOptions
+    execOptions: IExecOptions,
+    filterPattern: string
 ) {
     let command = new Array<string>();
-
-    command.push("universal", "download",
+    var verbosity = tl.getVariable("Packaging.ArtifactTool.Verbosity") || "Error";
+    
+    command.push(
+        "universal", "download",
         "--feed", options.feedId,
         "--service", options.accountUrl,
         "--package-name", options.packageName,
         "--package-version", options.packageVersion,
         "--path", downloadPath,
         "--patvar", "UNIVERSAL_DOWNLOAD_PAT",
-        "--verbosity", tl.getInput("verbosity"));
+        "--verbosity", verbosity,
+        "--filter", filterPattern);
 
-    console.log(tl.loc("Info_Downloading", options.packageName, options.packageVersion, options.feedId));
+    if (options.projectId) {
+        command.push("--project", options.projectId);
+    }
+
+    console.log(tl.loc("Info_Downloading", options.packageName, options.packageVersion, options.feedId, options.projectId));
     const execResult: IExecSyncResult = artifactToolRunner.runArtifactTool(
         options.artifactToolPath,
         command,

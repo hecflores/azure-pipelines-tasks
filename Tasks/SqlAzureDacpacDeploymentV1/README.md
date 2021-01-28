@@ -60,6 +60,16 @@ The parameters of the task are described in details, including examples, to show
 
 - **Azure Subscription\*:** Select the Azure Subscription where the Azure SQL Database will be deployed.
 
+**Authentication types**
+
+- **SQL Server Authentication** : Specify SQL Server user credentials
+
+- **Active Directory - Password**, **Active Directory - Integrated** : Specify 
+
+- **Connection String** : A connection string containing all the informations needed to connect the remote server.
+
+- **Service Principal** : Uses the Authenticaiton data from **Azure Subscription**. 
+
 **SQL DB Details**
 
 - **Azure SQL Server Name\*:** The connection string for the Azure SQL Server and the format is same as that is followed in SQL Server Management Studio. For example, FabrikamSQL.database.windows.net, 1433 or FabrikamSQL.database.windows.net are both valid Azure SQL Server names.
@@ -117,10 +127,10 @@ The parameters of the task are described in details, including examples, to show
 
 ### Supported Azure and AzureRM module versions:
 Recommended:
-[Azure PowerShell Installer v1.3.0] (https://github.com/Azure/azure-powershell/releases/tag/v1.3.0-March2016)
+[Azure PowerShell Installer v1.3.0](https://github.com/Azure/azure-powershell/releases/tag/v1.3.0-March2016)
 
 Other supported versions:
-[Azure PowerShell Installer v0.9.8] (https://github.com/Azure/azure-powershell/releases/tag/v0.9.8-September2015)
+[Azure PowerShell Installer v0.9.8](https://github.com/Azure/azure-powershell/releases/tag/v0.9.8-September2015)
 
 #1 https://msdn.microsoft.com/en-us/library/hh550080\(v=vs.103\).aspx
 

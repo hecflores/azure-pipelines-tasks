@@ -1,5 +1,5 @@
-import ma = require('vsts-task-lib/mock-answer');
-import tmrm = require('vsts-task-lib/mock-run');
+import * as ma from 'azure-pipelines-task-lib/mock-answer';
+import * as tmrm from 'azure-pipelines-task-lib/mock-run';
 import path = require('path');
 
 let taskPath = path.join(__dirname, '..', 'gradletask.js');
@@ -30,6 +30,10 @@ let a: ma.TaskLibAnswers = <ma.TaskLibAnswers>{
         'gradlew.bat build': {
             'code': 0,
             'stdout': 'Sample gradle output'
+        },
+        'reg query HKLM\\SOFTWARE\\JavaSoft\\Java Development Kit\\ /f 1.5 /k': {
+            'code': 222,
+            'stdout': ''
         },
         'reg query HKLM\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.5 /v JavaHome /reg:32': {
             'code': 222,

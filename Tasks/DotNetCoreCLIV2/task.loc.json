@@ -4,7 +4,7 @@
   "friendlyName": "ms-resource:loc.friendlyName",
   "description": "ms-resource:loc.description",
   "author": "Microsoft Corporation",
-  "helpUrl": "https://go.microsoft.com/fwlink/?linkid=832194",
+  "helpUrl": "https://docs.microsoft.com/azure/devops/pipelines/tasks/build/dotnet-core-cli",
   "helpMarkDown": "ms-resource:loc.helpMarkDown",
   "category": "Build",
   "visibility": [
@@ -17,8 +17,8 @@
   "demands": [],
   "version": {
     "Major": 2,
-    "Minor": 148,
-    "Patch": 2
+    "Minor": 181,
+    "Patch": 0
   },
   "minimumAgentVersion": "2.115.0",
   "instanceNameFormat": "ms-resource:loc.instanceNameFormat",
@@ -125,6 +125,15 @@
       "helpMarkDown": "ms-resource:loc.input.help.arguments"
     },
     {
+      "name": "restoreArguments",
+      "type": "string",
+      "label": "ms-resource:loc.input.label.restoreArguments",
+      "defaultValue": "",
+      "visibleRule": "command = restore",
+      "required": false,
+      "helpMarkDown": "ms-resource:loc.input.help.restoreArguments"
+    },
+    {
       "name": "publishTestResults",
       "type": "boolean",
       "label": "ms-resource:loc.input.label.publishTestResults",
@@ -132,6 +141,15 @@
       "visibleRule": "command = test",
       "required": false,
       "helpMarkDown": "ms-resource:loc.input.help.publishTestResults"
+    },
+    {
+      "name": "testRunTitle",
+      "type": "string",
+      "label": "ms-resource:loc.input.label.testRunTitle",
+      "defaultValue": "",
+      "visibleRule": "command = test",
+      "required": false,
+      "helpMarkDown": "ms-resource:loc.input.help.testRunTitle"
     },
     {
       "name": "zipAfterPublish",
@@ -291,7 +309,10 @@
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "ms-resource:loc.input.help.feedPublish",
-      "visibleRule": "command = push && nuGetFeedType = internal"
+      "visibleRule": "command = push && nuGetFeedType = internal",
+      "properties": {
+        "EditableOptions": "True"
+      }
     },
     {
       "name": "publishPackageMetadata",
@@ -355,6 +376,24 @@
       "label": "ms-resource:loc.input.label.nobuild",
       "defaultValue": "false",
       "helpMarkDown": "ms-resource:loc.input.help.nobuild",
+      "required": false,
+      "visibleRule": "command = pack"
+    },
+    {
+      "name": "includesymbols",
+      "type": "boolean",
+      "label": "ms-resource:loc.input.label.includesymbols",
+      "defaultValue": "false",
+      "helpMarkDown": "ms-resource:loc.input.help.includesymbols",
+      "required": false,
+      "visibleRule": "command = pack"
+    },
+    {
+      "name": "includesource",
+      "type": "boolean",
+      "label": "ms-resource:loc.input.label.includesource",
+      "defaultValue": "false",
+      "helpMarkDown": "ms-resource:loc.input.help.includesource",
       "required": false,
       "visibleRule": "command = pack"
     },
@@ -454,27 +493,28 @@
       "label": "ms-resource:loc.input.label.workingDirectory",
       "helpMarkDown": "ms-resource:loc.input.help.workingDirectory",
       "required": "false",
-      "groupName": "generalAdvanced"
+      "groupName": "generalAdvanced",
+      "visibleRule": "command != restore && command != push && command != pack"
     }
   ],
   "dataSourceBindings": [
     {
       "target": "feedRestore",
       "endpointId": "tfs:feed",
-      "endpointUrl": "{{endpoint.url}}/_apis/packaging/feeds",
+      "endpointUrl": "{{endpoint.url}}/_apis/packaging/feeds?includeUrls=False",
       "resultSelector": "jsonpath:$.value[*]",
-      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\" : \"{{{name}}}\" }"
+      "resultTemplate": "{ \"Value\" : \"{{#if project}}{{{project.id}}}\\/{{/if}}{{{id}}}\", \"DisplayValue\" : \"{{{name}}}\" }"
     },
     {
       "target": "feedPublish",
       "endpointId": "tfs:feed",
-      "endpointUrl": "{{endpoint.url}}/_apis/packaging/feeds",
+      "endpointUrl": "{{endpoint.url}}/_apis/packaging/feeds?includeUrls=False",
       "resultSelector": "jsonpath:$.value[*]",
-      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\" : \"{{{name}}}\" }"
+      "resultTemplate": "{ \"Value\" : \"{{#if project}}{{{project.id}}}\\/{{/if}}{{{id}}}\", \"DisplayValue\" : \"{{{name}}}\" }"
     }
   ],
   "execution": {
-    "Node": {
+    "Node10": {
       "target": "dotnetcore.js",
       "argumentFormat": ""
     }
@@ -502,7 +542,7 @@
     "dotnetCommandFailed": "ms-resource:loc.messages.dotnetCommandFailed",
     "noProjectFilesFound": "ms-resource:loc.messages.noProjectFilesFound",
     "noPublishFolderFoundToZip": "ms-resource:loc.messages.noPublishFolderFoundToZip",
-    "noWebProjctFound": "ms-resource:loc.messages.noWebProjctFound",
+    "noWebProjectFound": "ms-resource:loc.messages.noWebProjectFound",
     "zipFailed": "ms-resource:loc.messages.zipFailed",
     "Error_ApiKeyNotSupported": "ms-resource:loc.messages.Error_ApiKeyNotSupported",
     "Error_ExpectedConfigurationElement": "ms-resource:loc.messages.Error_ExpectedConfigurationElement",
@@ -529,6 +569,10 @@
     "NGCommon_SpsNotFound": "ms-resource:loc.messages.NGCommon_SpsNotFound",
     "NGCommon_UnabletoDetectNuGetVersion": "ms-resource:loc.messages.NGCommon_UnabletoDetectNuGetVersion",
     "NGCommon_UnableToFindTool": "ms-resource:loc.messages.NGCommon_UnableToFindTool",
-    "Warning_UpdatingNuGetVersion": "ms-resource:loc.messages.Warning_UpdatingNuGetVersion"
+    "Warning_SessionCreationFailed": "ms-resource:loc.messages.Warning_SessionCreationFailed",
+    "Warning_UpdatingNuGetVersion": "ms-resource:loc.messages.Warning_UpdatingNuGetVersion",
+    "Net5Update": "ms-resource:loc.messages.Net5Update",
+    "Net5NugetVersionCompat": "ms-resource:loc.messages.Net5NugetVersionCompat",
+    "DeprecatedDotnet2_2_And_3_0": "ms-resource:loc.messages.DeprecatedDotnet2_2_And_3_0"
   }
 }

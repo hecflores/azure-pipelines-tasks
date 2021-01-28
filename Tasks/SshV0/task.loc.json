@@ -3,7 +3,7 @@
   "name": "SSH",
   "friendlyName": "ms-resource:loc.friendlyName",
   "description": "ms-resource:loc.description",
-  "helpUrl": "http://go.microsoft.com/fwlink/?LinkId=821892",
+  "helpUrl": "https://docs.microsoft.com/azure/devops/pipelines/tasks/deploy/ssh",
   "helpMarkDown": "ms-resource:loc.helpMarkDown",
   "category": "Deploy",
   "visibility": [
@@ -17,11 +17,11 @@
   "author": "Microsoft Corporation",
   "version": {
     "Major": 0,
-    "Minor": 148,
+    "Minor": 180,
     "Patch": 0
   },
   "demands": [],
-  "minimumAgentVersion": "2.102.0",
+  "minimumAgentVersion": "2.144.0",
   "instanceNameFormat": "ms-resource:loc.instanceNameFormat",
   "groups": [
     {
@@ -88,6 +88,15 @@
       }
     },
     {
+      "name": "interpreterCommand",
+      "type": "string",
+      "label": "ms-resource:loc.input.label.interpreterCommand",
+      "defaultValue": "/bin/bash",
+      "required": false,
+      "visibleRule": "runOptions = inline",
+      "helpMarkDown": "ms-resource:loc.input.help.interpreterCommand"
+    },
+    {
       "name": "args",
       "type": "string",
       "label": "ms-resource:loc.input.label.args",
@@ -104,10 +113,32 @@
       "defaultValue": true,
       "helpMarkDown": "ms-resource:loc.input.help.failOnStdErr",
       "groupName": "advanced"
+    },
+    {
+      "name": "interactiveSession",
+      "type": "boolean",
+      "label": "ms-resource:loc.input.label.interactiveSession",
+      "required": false,
+      "defaultValue": false,
+      "helpMarkDown": "ms-resource:loc.input.help.interactiveSession",
+      "groupName": "advanced"
+    },
+    {
+      "name": "readyTimeout",
+      "type": "string",
+      "label": "ms-resource:loc.input.label.readyTimeout",
+      "defaultValue": "20000",
+      "required": true,
+      "groupName": "advanced",
+      "helpMarkDown": "ms-resource:loc.input.help.readyTimeout",
+      "validation": {
+        "expression": "isMatch(value, '(^\\d*$)','Multiline')",
+        "message": "Enter a valid value for timeout."
+      }
     }
   ],
   "execution": {
-    "Node": {
+    "Node10": {
       "target": "ssh.js",
       "argumentFormat": ""
     }

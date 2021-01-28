@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as pkgLocationUtils from "packaging-common/locationUtilities"; 
 import * as telemetry from "utility-common/telemetry";
-import * as tl from "vsts-task-lib";
+import * as tl from "azure-pipelines-task-lib";
 import * as artifactToolUtilities from "packaging-common/universal/ArtifactToolUtilities";
 import * as universalDownload from "./universaldownload";
 import * as universalPublish from "./universalpublish";
@@ -24,12 +24,17 @@ async function main(): Promise<void> {
         const blobUri = await pkgLocationUtils.getBlobstoreUriFromBaseServiceUri(
             serviceUri,
             localAccessToken);
-
+        
+        tl.debug(tl.loc("Info_RetrievingArtifactToolUri", blobUri));
+        
         // Finding the artifact tool directory
-        artifactToolPath = await artifactToolUtilities.getArtifactToolFromService(
-            blobUri,
-            localAccessToken,
-            "artifacttool");
+        artifactToolPath = await pkgLocationUtils.retryOnExceptionHelper(
+            () => artifactToolUtilities.getArtifactToolFromService(
+                blobUri,
+                localAccessToken,
+                "artifacttool"), 3, 1000);
+
+        tl.debug(tl.loc("Info_ArtifactToolPath", artifactToolPath));
     }
     catch (error) {
         tl.setResult(tl.TaskResult.Failed, tl.loc("FailedToGetArtifactTool", error.message));
